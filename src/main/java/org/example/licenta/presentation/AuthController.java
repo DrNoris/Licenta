@@ -1,7 +1,9 @@
 package org.example.licenta.presentation;
 
 import lombok.RequiredArgsConstructor;
-import org.example.licenta.application.dto.*;
+import org.example.licenta.application.dto.request.LoginRequest;
+import org.example.licenta.application.dto.request.RegisterRequest;
+import org.example.licenta.application.dto.response.AuthResponse;
 import org.example.licenta.application.service.AuthService;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;

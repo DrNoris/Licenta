@@ -1,7 +1,10 @@
 package org.example.licenta.application.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.licenta.application.dto.*;
+import org.example.licenta.application.dto.mapper.UserMapper;
+import org.example.licenta.application.dto.request.LoginRequest;
+import org.example.licenta.application.dto.request.RegisterRequest;
+import org.example.licenta.application.dto.response.AuthResponse;
 import org.example.licenta.domain.model.*;
 import org.example.licenta.infrastructure.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,14 +19,13 @@ public class AuthService {
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
 
+    private final UserMapper userMapper;
+
     public AuthResponse register(RegisterRequest request) {
 
-        User user = new User();
-        user.setUsername(request.username);
-        user.setEmail(request.email);
-        user.setPassword(passwordEncoder.encode(request.password));
-        user.setRole(Role.USER);
-        user.setEnabled(false);
+        User user = userMapper.toEntity(request);
+       // user.setRole(Role.USER);
+//        user.setEnabled(false);
 
         try {
             userRepository.save(user);
@@ -36,19 +38,18 @@ public class AuthService {
                 user.getRole().name()
         );
 
-        return new AuthResponse(token);
+        return AuthResponse.builder().token(token).build();
     }
 
     public AuthResponse login(LoginRequest request) {
 
-        User user = userRepository.findByEmail(request.email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepository.findByEmail(request.getEmail()).orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (!user.isEnabled()) {
-            throw new RuntimeException("User not activated");
-        }
+//        if (!user.isEnabled()) {
+//            throw new RuntimeException("User not activated");
+//        }
 
-        if (!passwordEncoder.matches(request.password, user.getPassword())) {
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new RuntimeException("Invalid credentials");
         }
 
@@ -57,6 +58,6 @@ public class AuthService {
                 user.getRole().name()
         );
 
-        return new AuthResponse(token);
+        return AuthResponse.builder().token(token).build();
     }
 }
