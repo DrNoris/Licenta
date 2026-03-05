@@ -5,7 +5,7 @@ import org.example.licenta.application.dto.request.LoginRequest;
 import org.example.licenta.application.dto.request.RegisterRequest;
 import org.example.licenta.application.dto.response.AuthResponse;
 import org.example.licenta.application.service.AuthService;
-import org.springframework.security.core.Authentication;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -16,19 +16,19 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public AuthResponse register(@RequestBody RegisterRequest request) {
-        return authService.register(request);
+    public ResponseEntity<String> register(@RequestBody RegisterRequest request) {
+        authService.register(request);
+
+        return ResponseEntity.ok("Verify Email");
     }
 
     @PostMapping("/login")
-    public AuthResponse login(@RequestBody LoginRequest request) {
-        return authService.login(request);
+    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
+        return ResponseEntity.ok(authService.login(request));
     }
 
-    @GetMapping("/me/role")
-    public String getMyRole(Authentication authentication) {
-        return authentication.getAuthorities()
-                .iterator().next()
-                .getAuthority(); // returns "ROLE_USER" or "ROLE_ADMIN"
+    @GetMapping("/verify")
+    public ResponseEntity<AuthResponse> verifyEmail(@RequestParam String token) {
+        return ResponseEntity.ok(authService.verifyEmail(token));
     }
 }

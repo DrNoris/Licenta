@@ -32,6 +32,9 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    @Column(nullable = false)
+    private boolean activated = false;
+
     @Enumerated(EnumType.STRING)
     private Role role = Role.USER;
 
@@ -42,4 +45,6 @@ public class User {
     @Builder.Default
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Booking> bookings = new ArrayList<>();
+
+
 }
