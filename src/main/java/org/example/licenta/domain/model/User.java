@@ -33,9 +33,11 @@ public class User {
     private String password;
 
     @Column(nullable = false)
+    @Builder.Default
     private boolean activated = false;
 
     @Enumerated(EnumType.STRING)
+    @Builder.Default
     private Role role = Role.USER;
 
     @Builder.Default
