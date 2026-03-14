@@ -8,7 +8,7 @@ import "./LocationPicker.styles.css";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
-import type {LatLng} from "../AddSpotModal/AddSpotModal.types.ts";
+import type {LatLng, LocationPickerProps, NominatimResult} from "./LocationPicker.types.ts";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error
@@ -19,24 +19,36 @@ L.Icon.Default.mergeOptions({
     shadowUrl: markerShadow,
 });
 
-interface LocationPickerProps {
-    value: LatLng | null;
-    onChange: (latlng: LatLng, address: string) => void;
-    disabled?: boolean;
+// eslint-disable-next-line react-refresh/only-export-components
+export async function reverseGeocode(latlng: LatLng) {
+    try {
+        const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${latlng.lat}&lon=${latlng.lng}&format=json`
+        );
+        const data = await res.json();
+
+        const address: string = [
+            data.address?.building,
+            data.address?.house_number,
+            data.address?.road,
+            data.address?.suburb,
+            data.address?.city
+        ]
+            .filter(Boolean)
+            .join(", ");
+
+        return address;
+    } catch {
+        return "";
+    }
 }
 
-interface NominatimResult {
-    lat: string;
-    lon: string;
-    display_name: string;
-}
-
-const DEFAULT_CENTER: LatLng = { lat: 46.7712, lng: 23.6236 }; // Cluj-Napoca
+const DEFAULT_CENTER: LatLng = { lat: 46.769379, lng: 23.589954 };
 
 function LocationPicker({ value, onChange, disabled = false }: LocationPickerProps) {
-    const mapContainerRef = useRef<HTMLDivElement>(null);
-    const mapRef = useRef<L.Map | null>(null);
-    const markerRef = useRef<L.Marker | null>(null);
+    const mapContainerRef: React.RefObject<HTMLDivElement | null> = useRef<HTMLDivElement>(null);
+    const mapRef: React.RefObject<L.Map | null> = useRef<L.Map | null>(null);
+    const markerRef: React.RefObject<L.Marker | null> = useRef<L.Marker | null>(null);
 
     const [query, setQuery] = useState("");
     const [suggestions, setSuggestions] = useState<NominatimResult[]>([]);
@@ -47,10 +59,7 @@ function LocationPicker({ value, onChange, disabled = false }: LocationPickerPro
     useEffect(() => {
         if (!mapContainerRef.current || mapRef.current) return;
 
-        const map = L.map(mapContainerRef.current).setView(
-            value ? [value.lat, value.lng] : [DEFAULT_CENTER.lat, DEFAULT_CENTER.lng],
-            14
-        );
+        const map = L.map(mapContainerRef.current).setView([DEFAULT_CENTER.lat, DEFAULT_CENTER.lng], 14);
 
         L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
             attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
@@ -63,11 +72,14 @@ function LocationPicker({ value, onChange, disabled = false }: LocationPickerPro
         }
 
         // Click to place/move marker
-        map.on("click", (e: L.LeafletMouseEvent) => {
-            placeMarker({ lat: e.latlng.lat, lng: e.latlng.lng });
-            reverseGeocode({ lat: e.latlng.lat, lng: e.latlng.lng });
-        });
+        map.on("click", async (e: L.LeafletMouseEvent) => {
+            const latlng = { lat: e.latlng.lat, lng: e.latlng.lng };
 
+            placeMarker(latlng);
+            onChange(latlng, "");
+            const displayName = await reverseGeocode(latlng);
+            onChange(latlng, displayName);
+        });
         mapRef.current = map;
 
         return () => {
@@ -76,35 +88,27 @@ function LocationPicker({ value, onChange, disabled = false }: LocationPickerPro
         };
     }, []);
 
-    function handleMarkerDrag(this: L.Marker) {
+    async function handleMarkerDrag(this: L.Marker) {
         const pos = this.getLatLng();
-        reverseGeocode({ lat: pos.lat, lng: pos.lng });
+        const latlng = {lat: pos.lat, lng: pos.lng};
+        const displayName = await reverseGeocode(latlng);
+        onChange(latlng, displayName);
     }
 
-    function placeMarker(latlng: LatLng) {
+     function placeMarker(latlng: LatLng) {
         if (!mapRef.current) return;
         if (markerRef.current) {
             markerRef.current.setLatLng([latlng.lat, latlng.lng]);
         } else {
             markerRef.current = L.marker([latlng.lat, latlng.lng], { draggable: true }).addTo(mapRef.current);
-            markerRef.current.on("dragend", function (this: L.Marker) {
+            markerRef.current.on("dragend", async function (this: L.Marker) {
                 const pos = this.getLatLng();
-                reverseGeocode({ lat: pos.lat, lng: pos.lng });
+                const latlng = {lat: pos.lat, lng: pos.lng};
+                const displayName = await reverseGeocode(latlng);
+                onChange(latlng, displayName);
             });
         }
         onChange(latlng, "");
-    }
-
-    async function reverseGeocode(latlng: LatLng) {
-        try {
-            const res = await fetch(
-                `https://nominatim.openstreetmap.org/reverse?lat=${latlng.lat}&lon=${latlng.lng}&format=json`
-            );
-            const data = await res.json();
-            onChange(latlng, data.display_name ?? "");
-        } catch {
-            onChange(latlng, "");
-        }
     }
 
     // ── Address search with debounce ────────────────────────────
@@ -174,17 +178,6 @@ function LocationPicker({ value, onChange, disabled = false }: LocationPickerPro
             {/* Map */}
             <div ref={mapContainerRef} className="location-picker__map" />
 
-            {/* Coordinates */}
-            {value && (
-                <div className="location-picker__coords">
-                    <div className="location-picker__coord">
-                        Lat: <span>{value.lat.toFixed(6)}</span>
-                    </div>
-                    <div className="location-picker__coord">
-                        Lng: <span>{value.lng.toFixed(6)}</span>
-                    </div>
-                </div>
-            )}
         </div>
     );
 }

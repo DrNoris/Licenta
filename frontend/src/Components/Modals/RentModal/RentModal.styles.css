@@ -1,5 +1,5 @@
 /* ── Overlay ─────────────────────────────────────────────────── */
-.booking-overlay {
+.rent-overlay {
     position: fixed;
     inset: 0;
     background-color: rgba(0, 0, 0, 0.5);
@@ -11,7 +11,7 @@
 }
 
 /* ── Modal box ───────────────────────────────────────────────── */
-.booking-modal {
+.rent-modal {
     background-color: #ffffff;
     border-radius: 0.75rem;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
@@ -25,7 +25,7 @@
 }
 
 /* ── Header ──────────────────────────────────────────────────── */
-.booking-modal__header {
+.rent-modal__header {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -34,20 +34,20 @@
     flex-shrink: 0;       /* never squish */
 }
 
-.booking-modal__title {
+.rent-modal__title {
     font-size: 1.1rem;
     font-weight: 700;
     color: #111827;
     margin: 0;
 }
 
-.booking-modal__subtitle {
+.rent-modal__subtitle {
     font-size: 0.8rem;
     color: #6b7280;
     margin: 0.15rem 0 0;
 }
 
-.booking-modal__close {
+.rent-modal__close {
     background: none;
     border: none;
     cursor: pointer;
@@ -59,13 +59,13 @@
     transition: color 0.2s, background-color 0.2s;
 }
 
-.booking-modal__close:hover {
+.rent-modal__close:hover {
     color: #111827;
     background-color: #f3f4f6;
 }
 
 /* ── Body ────────────────────────────────────────────────────── */
-.booking-modal__body {
+.rent-modal__body {
     padding: 1.25rem 1.5rem;
     flex: 1;              /* takes all remaining height between header and footer */
     display: flex;
@@ -76,7 +76,7 @@
 }
 
 /* ── Date section ────────────────────────────────────────────── */
-.booking-modal__section-label {
+.rent-modal__section-label {
     font-size: 0.8rem;
     font-weight: 600;
     color: #374151;
@@ -85,7 +85,7 @@
     margin-bottom: 0.5rem;
 }
 
-.booking-modal__date-input {
+.rent-modal__date-input {
     width: 100%;
     padding: 0.5rem 0.75rem;
     border: 1px solid #d1d5db;
@@ -97,13 +97,13 @@
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.booking-modal__date-input:focus {
+.rent-modal__date-input:focus {
     border-color: #3b82f6;
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
 }
 
 /* ── Slots section ───────────────────────────────────────────── */
-.booking-modal__slots-section {
+.rent-modal__slots-section {
     flex: 1;              /* takes remaining space inside body */
     display: flex;
     flex-direction: column;
@@ -111,7 +111,7 @@
     overflow: hidden;
 }
 
-.booking-modal__slots-wrap {
+.rent-modal__slots-wrap {
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -121,19 +121,19 @@
 }
 
 /* Subtle scrollbar styling */
-.booking-modal__slots-wrap::-webkit-scrollbar {
+.rent-modal__slots-wrap::-webkit-scrollbar {
     width: 4px;
 }
-.booking-modal__slots-wrap::-webkit-scrollbar-track {
+.rent-modal__slots-wrap::-webkit-scrollbar-track {
     background: transparent;
 }
-.booking-modal__slots-wrap::-webkit-scrollbar-thumb {
+.rent-modal__slots-wrap::-webkit-scrollbar-thumb {
     background-color: #d1d5db;
     border-radius: 9999px;
 }
 
-.booking-modal__slots-loading,
-.booking-modal__slots-empty {
+.rent-modal__slots-loading,
+.rent-modal__slots-empty {
     text-align: center;
     padding: 1.5rem 0;
     color: #9ca3af;
@@ -144,7 +144,7 @@
     gap: 0.5rem;
 }
 
-.booking-modal__spinner {
+.rent-modal__spinner {
     width: 1.5rem;
     height: 1.5rem;
     border: 3px solid #e5e7eb;
@@ -228,7 +228,7 @@
 }
 
 /* ── Footer ──────────────────────────────────────────────────── */
-.booking-modal__footer {
+.rent-modal__footer {
     padding: 1rem 1.5rem;
     border-top: 1px solid #f3f4f6;
     display: flex;
@@ -238,21 +238,21 @@
     gap: 0.75rem;
 }
 
-.booking-modal__selection-info {
+.rent-modal__selection-info {
     font-size: 0.8rem;
     color: #6b7280;
 }
 
-.booking-modal__selection-info strong {
+.rent-modal__selection-info strong {
     color: #1e40af;
 }
 
-.booking-modal__footer-actions {
+.rent-modal__footer-actions {
     display: flex;
     gap: 0.75rem;
 }
 
-.booking-modal__btn-cancel {
+.rent-modal__btn-cancel {
     padding: 0.5rem 1rem;
     background-color: #f3f4f6;
     color: #374151;
@@ -264,11 +264,11 @@
     transition: background-color 0.2s;
 }
 
-.booking-modal__btn-cancel:hover {
+.rent-modal__btn-cancel:hover {
     background-color: #e5e7eb;
 }
 
-.booking-modal__btn-confirm {
+.rent-modal__btn-confirm {
     padding: 0.5rem 1.25rem;
     background-color: #1e40af;
     color: #ffffff;
@@ -280,12 +280,12 @@
     transition: background-color 0.2s, color 0.2s;
 }
 
-.booking-modal__btn-confirm:hover:not(:disabled) {
+.rent-modal__btn-confirm:hover:not(:disabled) {
     background-color: #ffffff;
     color: #1e40af;
 }
 
-.booking-modal__btn-confirm:disabled {
+.rent-modal__btn-confirm:disabled {
     opacity: 0.5;
     cursor: not-allowed;
 }

@@ -28,7 +28,7 @@ export async function getMyParkingSpots(): Promise<ParkingSpot[]> {
 // ── Add a parking spot (multipart) ───────────────────────────
 // Sends spot data as a JSON part + images as file parts
 export async function addParkingSpot(
-    spot: Omit<ParkingSpot, "id" | "imageUrls">,
+    spot: Omit<ParkingSpot, "id" | "imagePublicIds">,
     files: File[]
 ): Promise<ParkingSpot> {
     const formData = new FormData();
@@ -52,13 +52,72 @@ export async function addParkingSpot(
     return res.json();
 }
 
+// ── Edit a parking spot ───────────────────────────────────────
+export async function editParkingSpot(
+    spotId: string,
+    spot: { description: string; pricePerHour: number; pricePerDay: number },
+    files: File[]
+): Promise<ParkingSpot> {
+    const formData = new FormData();
+
+    formData.append(
+        "data",
+        new Blob([JSON.stringify(spot)], { type: "application/json" })
+    );
+
+    files.forEach((file) => formData.append("images", file));
+
+    const res = await fetch(`${API_BASE}/api/parking-spot/${spotId}`, {
+        method: "PUT",
+        headers: authHeaders(),
+        body: formData,
+    });
+
+    if (!res.ok) throw new Error("Editarea a eșuat.");
+    return res.json();
+}
+
+// ── Edit a parking spot (PATCH) ───────────────────────────────
+export async function editParkingSpotPatch(
+    spotId: string,
+    data: { description: string; pricePerHour: number; pricePerDay: number },
+    newFiles: File[],
+    publicIdsToDelete: string[]
+): Promise<ParkingSpot> {
+    const formData = new FormData();
+
+    formData.append(
+        "data",
+        new Blob([JSON.stringify({
+            ...data,
+            publicIdsToDelete,
+        })], { type: "application/json" })
+    );
+
+    newFiles.forEach((file) => formData.append("images", file));
+
+    const res = await fetch(`${API_BASE}/api/parking-spot/${spotId}`, {
+        method: "PATCH",
+        headers: authHeaders(),
+        body: formData,
+    });
+
+    if (!res.ok) throw new Error("Editarea a eșuat.");
+    return res.json();
+}
+
 // ── Delete a parking spot ─────────────────────────────────────
 export async function deleteParkingSpot(id: string): Promise<void> {
     const res = await fetch(`${API_BASE}/api/parking-spot/${id}`, {
         method: "DELETE",
         headers: jsonAuthHeaders(),
     });
-    if (!res.ok) throw new Error("Ștergerea a eșuat.");
+
+    if (res.status === 409)
+        throw new Error("Nu poți șterge un loc cu rezervări viitoare.");
+
+    if (!res.ok)
+        throw new Error("Ștergerea a eșuat.");
 }
 
 // ── Fetch signed image URLs for an authorized user ────────────

@@ -9,12 +9,14 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface ParkingSpotMapper {
-    @Mapping(target = "imageUrls", expression = "java(new java.util.ArrayList<>())")
+    @Mapping(target = "imagePublicIds", ignore = true)
+    @Mapping(target = "address", source = "address")
     ParkingSpotResponse toResponse(ParkingSpot parkingSpot);
 
     @Mapping(target = "id",             ignore = true)
     @Mapping(target = "availableSlots", ignore = true)
     @Mapping(target = "owner",          source = "owner")
     @Mapping(target = "images",         expression = "java(new java.util.ArrayList<>())")
+    @Mapping(target = "address",        source = "request.address")
     ParkingSpot toEntity(CreateParkingSpotRequest request, User owner);
 }

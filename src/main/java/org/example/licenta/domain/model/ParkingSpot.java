@@ -24,6 +24,8 @@ public class ParkingSpot {
 
     private String description;
 
+    private String address;
+
     @Column(nullable = false)
     private Double pricePerHour;
 

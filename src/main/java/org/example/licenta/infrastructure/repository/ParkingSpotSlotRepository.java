@@ -2,6 +2,8 @@ package org.example.licenta.infrastructure.repository;
 
 import org.example.licenta.domain.model.ParkingSpotSlot;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -18,4 +20,12 @@ public interface ParkingSpotSlotRepository extends JpaRepository<ParkingSpotSlot
     List<ParkingSpotSlot> findByParkingSpotId(UUID spotId);
 
     void deleteByParkingSpotIdAndDateAndBookingIsNull(UUID spotId, LocalDate date);
+
+    @Query("""
+    SELECT COUNT(s) > 0 FROM ParkingSpotSlot s
+    WHERE s.parkingSpot.id = :spotId
+    AND s.booking IS NOT NULL
+    AND s.date >= :today
+    """)
+    boolean hasUpcomingBookings(@Param("spotId") UUID spotId, @Param("today") LocalDate today);
 }

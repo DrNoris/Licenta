@@ -9,9 +9,10 @@ export interface AvailabilityResponse {
     availableSlots: TimeSlot[];
 }
 
-export interface BookingModalProps {
-    open: boolean;
+export interface RentModalProps {
+    isOpen: boolean;
     onClose: () => void;
+    onAddTimeSlot: (id: string, selectedDate: string, timeSlotIds: TimeSlot[]) => void;
     spotId: string;
     spotDescription: string;
 }

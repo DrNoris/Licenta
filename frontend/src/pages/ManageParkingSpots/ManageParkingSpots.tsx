@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { Plus, ParkingSquare } from "lucide-react";
 import type {ManagePageState, ParkingSpot} from "./ManageParkingSpots.types.ts";
-import {deleteParkingSpot, getMyParkingSpots} from "../../services/parkingSpotService.ts";
+import {deleteParkingSpot, editParkingSpotPatch, getMyParkingSpots} from "../../services/parkingSpotService.ts";
 import ParkingSpotCard from "../../Components/ParkingSpotsCard/ParkingSpotCard.tsx";
-import AddSpotModal from "../../Components/AddSpotModal/AddSpotModal.tsx";
 import "./ManageParkingSpots.styles.css"
 import Header from "../../Components/Header/Header.tsx";
+import AddSpotModal from "../../Components/Modals/AddSpotModal/AddSpotModal.tsx";
+import type {TimeSlot} from "../../Components/Modals/RentModal/RentModal.types.ts";
+import {addParkingSpotSlot} from "../../services/rentService.ts";
 
 function ManageParkingSpots() {
     const [state, setState] = useState<ManagePageState>({
@@ -40,13 +42,38 @@ function ManageParkingSpots() {
         }
     };
 
-    const handleAddTimeSlot = async (id: string, timeSlotsIds: string[]): Promise<void> => {
-        console.log(id, timeSlotsIds);
+    const handleAddTimeSlot = async (parkingSpotId: string, selectedDate: string, timeSlots: TimeSlot[]): Promise<void> => {
+        try {
+            const timeslotIds: string[] = timeSlots.map((timeSlot: TimeSlot) => timeSlot.id);
+            await addParkingSpotSlot(parkingSpotId, selectedDate, timeslotIds);
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : "Adăugarea de oferta a eșuat.";
+            setState((prev) => ({ ...prev, error: message }));
+        }
     };
 
     // ── Add ─────────────────────────────────────────────────────
     const handleAdd = (spot: ParkingSpot): void => {
         setState((prev) => ({ ...prev, spots: [spot, ...prev.spots] }));
+    };
+
+    const handleEdit = (spotId: string) => async (
+        description: string,
+        pricePerHour: number,
+        pricePerDay: number,
+        newFiles: File[],
+        publicIdsToDelete: string[]
+    ): Promise<void> => {
+        const updated = await editParkingSpotPatch(
+            spotId,
+            { description, pricePerHour, pricePerDay },
+            newFiles,
+            publicIdsToDelete
+        );
+        setState((prev) => ({
+            ...prev,
+            spots: prev.spots.map((s) => s.id === updated.id ? updated : s),
+        }));
     };
 
     return (<>
@@ -101,7 +128,7 @@ function ManageParkingSpots() {
                 {state.status === "idle" && state.spots.length > 0 && (
                     <div className="manage-page__grid">
                         {state.spots.map((spot) => (
-                            <ParkingSpotCard key={spot.id} spot={spot} onDelete={handleDelete} onAddTimeSlot={handleAddTimeSlot} isOwner={true} />
+                            <ParkingSpotCard key={spot.id} spot={spot} onDelete={handleDelete} onAddTimeSlot={handleAddTimeSlot} onEdit={handleEdit(spot.id)} isOwner={true} />
                         ))}
                     </div>
                 )}

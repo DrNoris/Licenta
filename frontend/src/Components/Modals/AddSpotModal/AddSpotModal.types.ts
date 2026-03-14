@@ -1,4 +1,4 @@
-import type {ParkingSpot} from "../../pages/ManageParkingSpots/ManageParkingSpots.types.ts";
+import type {ParkingSpot} from "../../../pages/ManageParkingSpots/ManageParkingSpots.types.ts";
 
 export interface AddSpotFormState {
     description: string;
@@ -29,8 +29,3 @@ export const EMPTY_FORM: AddSpotFormState = {
     error: "",
     loading: false
 };
-
-export interface LatLng {
-    lat: number;
-    lng: number;
-}

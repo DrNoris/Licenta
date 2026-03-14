@@ -1,12 +1,11 @@
 import { useRef, useState } from "react";
 import { UploadCloud, X } from "lucide-react";
-import type {PhotoUploaderProps} from "./PhotoUploader.types.ts";
-import "./PhotoUploader.styles.css"
+import type { PhotoUploaderProps } from "./PhotoUploader.types.ts";
+import "./PhotoUploader.styles.css";
 
-const MAX_FILES = 5;
 const ACCEPTED = ["image/jpeg", "image/png", "image/webp"];
 
-function PhotoUploader({ files, onChange, disabled = false }: PhotoUploaderProps) {
+function PhotoUploader({ files, onChange, disabled = false, maxFiles = 5 }: PhotoUploaderProps) {
     const inputRef = useRef<HTMLInputElement>(null);
     const [dragging, setDragging] = useState(false);
 
@@ -14,7 +13,7 @@ function PhotoUploader({ files, onChange, disabled = false }: PhotoUploaderProps
         if (!incoming) return;
         const valid = Array.from(incoming)
             .filter((f) => ACCEPTED.includes(f.type))
-            .slice(0, MAX_FILES - files.length);
+            .slice(0, maxFiles - files.length);
         if (valid.length) onChange([...files, ...valid]);
     };
 
@@ -24,8 +23,7 @@ function PhotoUploader({ files, onChange, disabled = false }: PhotoUploaderProps
 
     return (
         <div className="photo-uploader">
-            {/* Drop zone — only show if under limit */}
-            {files.length < MAX_FILES && (
+            {files.length < maxFiles && (
                 <div
                     className={[
                         "photo-uploader__dropzone",
@@ -35,7 +33,6 @@ function PhotoUploader({ files, onChange, disabled = false }: PhotoUploaderProps
                     onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
                     onDragLeave={() => setDragging(false)}
                     onDrop={(e) => { e.preventDefault(); setDragging(false); addFiles(e.dataTransfer.files); }}
-                    onClick={() => !disabled && inputRef.current?.click()}
                 >
                     <input
                         ref={inputRef}
@@ -51,12 +48,11 @@ function PhotoUploader({ files, onChange, disabled = false }: PhotoUploaderProps
                         Trage fotografiile aici sau <strong>apasă pentru a selecta</strong>
                     </p>
                     <p className="photo-uploader__hint">
-                        JPG, PNG, WEBP · Maxim {MAX_FILES} fotografii · {files.length}/{MAX_FILES} adăugate
+                        JPG, PNG, WEBP · Maxim {maxFiles} fotografii · {files.length}/{maxFiles} adăugate
                     </p>
                 </div>
             )}
 
-            {/* Previews */}
             {files.length > 0 && (
                 <div className="photo-uploader__previews">
                     {files.map((file, i) => (

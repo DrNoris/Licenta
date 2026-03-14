@@ -1,6 +1,6 @@
 import { Clock } from "lucide-react";
-import type {SlotItemProps} from "./BookingModal.types.ts";
-import {formatHour} from "../../services/bookingService.ts";
+import type {SlotItemProps} from "./RentModal.types.ts";
+import {formatHour} from "../../../services/rentService.ts";
 
 function SlotItem({ slot, isAvailable, isSelected, onToggle }: SlotItemProps) {
     const handleClick = () => {

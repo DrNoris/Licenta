@@ -1,11 +1,12 @@
 export interface ParkingSpot {
     id: string;
     description: string;
+    address: string;
     pricePerHour: number;
     pricePerDay: number;
     latitude: number;
     longitude: number;
-    imageUrls: string[];
+    imagePublicIds: string[];
 }
 
 export type ManageStatus = "idle" | "loading" | "error";

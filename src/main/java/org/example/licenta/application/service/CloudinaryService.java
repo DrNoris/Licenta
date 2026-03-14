@@ -24,6 +24,14 @@ public class CloudinaryService {
         return (String) result.get("public_id");
     }
 
+    public void deleteImage(String publicId) throws IOException {
+        cloudinary.uploader().destroy(publicId, ObjectUtils.asMap(
+                "type",          "authenticated",
+                "resource_type", "image",
+                "invalidate",    true
+        ));
+    }
+
     public String generateSignedUrl(String publicId) {
         long expiresAt = System.currentTimeMillis() / 1000 + 300;
         try {

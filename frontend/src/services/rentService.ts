@@ -1,5 +1,5 @@
 import { getToken } from "./authService";
-import type {ParkingSpotSlot, TimeSlot} from "../Components/BookingModal/BookingModal.types.ts";
+import type {ParkingSpotSlot, TimeSlot} from "../Components/Modals/RentModal/RentModal.types.ts";
 
 const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8080";
 const ALL_SLOTS_KEY = "cache_all_time_slots";
@@ -30,6 +30,19 @@ export async function getAllTimeSlots(): Promise<TimeSlot[]> {
     const slots: TimeSlot[] = await res.json();
     localStorage.setItem(ALL_SLOTS_KEY, JSON.stringify(slots));
     return slots;
+}
+
+export async function addParkingSpotSlot(parkingSpotId: string, selectedDate: string, timeslotIds: string[]): Promise<void> {
+    const res = await fetch(`${API_BASE}/api/parking-spot-slots/${parkingSpotId}`, {
+        method: "POST",
+        headers: authHeaders(),
+        body: JSON.stringify({
+            date: selectedDate,
+            timeSlotIds: timeslotIds,
+        }),
+    });
+
+    if (!res.ok) throw new Error("Adăugarea a eșuat.");
 }
 
 // ── Available slots for a spot on a given date ────────────────

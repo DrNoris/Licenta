@@ -2,6 +2,7 @@ package org.example.licenta.presentation;
 
 import lombok.RequiredArgsConstructor;
 import org.example.licenta.application.dto.request.CreateParkingSpotRequest;
+import org.example.licenta.application.dto.request.UpdateParkingSpotRequest;
 import org.example.licenta.application.dto.response.ParkingSpotResponse;
 import org.example.licenta.application.service.ParkingSpotService;
 import org.springframework.http.HttpStatus;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.UUID;
 
@@ -35,36 +37,51 @@ public class ParkingSpotController {
     @GetMapping("/manage")
     public ResponseEntity<List<ParkingSpotResponse>> getMySpots(Authentication authentication) {
         UUID ownerId = UUID.fromString(authentication.getName());
-        return ResponseEntity.ok(parkingSpotService.getAllSpots(ownerId));
+        List<ParkingSpotResponse> repsonse = parkingSpotService.getAllSpots(ownerId);
+
+        return ResponseEntity.ok(repsonse);
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ParkingSpotResponse> createParkingSpot(
-            @RequestPart("data") CreateParkingSpotRequest request,
-            @RequestPart(value = "images", required = false) List<MultipartFile> images,
-            Authentication authentication
-    ) throws IOException {
+    public ResponseEntity<ParkingSpotResponse> createParkingSpot(@RequestPart("data") CreateParkingSpotRequest request, @RequestPart(value = "images", required = false) List<MultipartFile> images, Authentication authentication) throws IOException {
         UUID ownerId = UUID.fromString(authentication.getName());
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(parkingSpotService.createParkingSpot(request, images, ownerId));
+        ParkingSpotResponse response = parkingSpotService.createParkingSpot(request, images, ownerId);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    //mutat in service
+    @PatchMapping(value ="/{spotId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ParkingSpotResponse> updateParkingSpot(@PathVariable UUID spotId, @RequestPart("data") UpdateParkingSpotRequest request, @RequestPart(value = "images", required = false) List<MultipartFile> images, Authentication authentication) throws IOException {
+        UUID ownerId = UUID.fromString(authentication.getName());
+        ParkingSpotResponse response = parkingSpotService.updateParkingSpot(request, images, ownerId, spotId);
+
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
+    }
+
+    @DeleteMapping("/{parkingSpotId}")
+    public ResponseEntity<Void> deleteParkingSpot(@PathVariable UUID parkingSpotId, Authentication authentication) {
+        UUID ownerId = UUID.fromString(authentication.getName());
+
+        try {
+            parkingSpotService.deleteParkingSpot(parkingSpotId, ownerId);
+            return ResponseEntity.ok().build();
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        }
+    }
+
     @GetMapping("/{spotId}/images")
-    public ResponseEntity<List<String>> getImages(
-            @PathVariable String spotId,
-            Authentication authentication
-    ) {
+    public ResponseEntity<List<String>> getImages(@PathVariable String spotId, Authentication authentication) {
         UUID requesterId = UUID.fromString(authentication.getName());
         UUID spotUUID = UUID.fromString(spotId);
 
-        boolean isOwner = parkingSpotService.isOwner(spotUUID, requesterId);
-        // boolean hasPaid = bookingService.hasActiveBooking(spotUUID, requesterId); // add later
-
-        if (!isOwner /* && !hasPaid */) {
+        try {
+            List<String> response = parkingSpotService.getSignedImageUrls(requesterId, spotUUID);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-
-        return ResponseEntity.ok(parkingSpotService.getSignedImageUrls(spotUUID));
     }
 }

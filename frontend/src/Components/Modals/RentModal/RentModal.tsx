@@ -1,12 +1,15 @@
 import React, { useEffect, useRef, useState } from "react";
 import {createPortal} from "react-dom";
 import { X, CalendarDays } from "lucide-react";
-import type {BookingModalProps, ParkingSpotSlot, TimeSlot} from "./BookingModal.types.ts";
-import { formatDate, getAllTimeSlots, manageSlots } from "../../services/bookingService.ts";
+import type {RentModalProps, ParkingSpotSlot, TimeSlot} from "./RentModal.types.ts";
+import { formatDate, getAllTimeSlots, manageSlots } from "../../../services/rentService.ts";
 import SlotItem from "./Slotitem.tsx";
-import "./BookingModal.styles.css";
+import "./RentModal.styles.css";
+import {useBodyScrollLock} from "../../../hooks/useBodyScrollLock.ts";
 
-function BookingModal({ open, onClose, spotId, spotDescription }: BookingModalProps) {
+function RentModal({ isOpen, onClose, spotId, spotDescription, onAddTimeSlot }: RentModalProps) {
+    useBodyScrollLock(isOpen);
+
     const today = formatDate(new Date());
     const [selectedDate, setSelectedDate] = useState<string>(today);
 
@@ -23,7 +26,7 @@ function BookingModal({ open, onClose, spotId, spotDescription }: BookingModalPr
 
     // ── Load all slots once when modal first opens ────────────────
     useEffect(() => {
-        if (!open || allSlotsLoadedRef.current) return;
+        if (!isOpen || allSlotsLoadedRef.current) return;
 
         getAllTimeSlots()
             .then((slots) => {
@@ -33,13 +36,13 @@ function BookingModal({ open, onClose, spotId, spotDescription }: BookingModalPr
             .catch((err: unknown) => {
                 setError(err instanceof Error ? err.message : "Eroare la încărcarea intervalelor.");
             });
-    }, [open]);
+    }, [isOpen]);
 
     // ── Load availability when date changes ───────────────────────
     // Using a ref for the date comparison avoids putting loadAvailability
     // in the dependency array which caused the infinite loop
     useEffect(() => {
-        if (!open) return;
+        if (!isOpen) return;
         if (lastFetchedDateRef.current === selectedDate) return;
 
         lastFetchedDateRef.current = selectedDate;
@@ -50,7 +53,6 @@ function BookingModal({ open, onClose, spotId, spotDescription }: BookingModalPr
 
         manageSlots(spotId, selectedDate)
             .then((data) => {
-                console.log(data)
                 const takenIds = new Set<string>(data.map((parkingSpotSlot: ParkingSpotSlot) => parkingSpotSlot.timeSlotId));
                 setSlotsForSpotIds(takenIds);
             })
@@ -61,18 +63,18 @@ function BookingModal({ open, onClose, spotId, spotDescription }: BookingModalPr
             .finally(() => {
                 setAvailabilityLoading(false);
             });
-    }, [open, selectedDate, spotId]);
+    }, [isOpen, selectedDate, spotId]);
 
     // ── Reset when modal closes so next open is fresh ─────────────
     useEffect(() => {
-        if (!open) {
+        if (!isOpen) {
             lastFetchedDateRef.current = "";
             // eslint-disable-next-line react-hooks/set-state-in-effect
             setSelectedDate(today);
             setSelectedSlots([]);
             setError("");
         }
-    }, [open]);
+    }, [isOpen]);
 
     const handleToggle = (slot: TimeSlot): void => {
         setSelectedSlots((prev) =>
@@ -83,8 +85,7 @@ function BookingModal({ open, onClose, spotId, spotDescription }: BookingModalPr
     };
 
     const handleConfirm = (): void => {
-        // TODO: call booking creation endpoint
-        console.log("Booking:", { spotId, date: selectedDate, slots: selectedSlots });
+        onAddTimeSlot(spotId, selectedDate, selectedSlots)
         onClose();
     };
 
@@ -96,35 +97,35 @@ function BookingModal({ open, onClose, spotId, spotDescription }: BookingModalPr
         return length > 1 || length== 0 ? "e" : ""
     }
 
-    if (!open) return null;
+    if (!isOpen) return null;
 
     return createPortal(
-        <div className="booking-overlay" onClick={handleOverlayClick}>
-            <div className="booking-modal">
+        <div className="rent-overlay" onClick={handleOverlayClick}>
+            <div className="rent-modal">
 
                 {/* Header */}
-                <div className="booking-modal__header">
+                <div className="rent-modal__header">
                     <div>
-                        <h3 className="booking-modal__title">Închireaza loc</h3>
-                        <p className="booking-modal__subtitle">{spotDescription}</p>
+                        <h3 className="rent-modal__title">Închireaza loc</h3>
+                        <p className="rent-modal__subtitle">{spotDescription}</p>
                     </div>
-                    <button className="booking-modal__close" onClick={onClose} aria-label="Închide">
+                    <button className="rent-modal__close" onClick={onClose} aria-label="Închide">
                         <X size={20} />
                     </button>
                 </div>
 
                 {/* Body */}
-                <div className="booking-modal__body">
+                <div className="rent-modal__body">
 
                     {/* Date picker */}
                     <div>
-                        <p className="booking-modal__section-label">
+                        <p className="rent-modal__section-label">
                             <CalendarDays size={13} style={{ display: "inline", marginRight: "0.3rem" }} />
                             Selectează data
                         </p>
                         <input
                             type="date"
-                            className="booking-modal__date-input"
+                            className="rent-modal__date-input"
                             value={selectedDate}
                             min={today}
                             onChange={(e) => setSelectedDate(e.target.value)}
@@ -133,28 +134,28 @@ function BookingModal({ open, onClose, spotId, spotDescription }: BookingModalPr
 
                     {/* Slots */}
                     {/* Slots — wrap in slots-section so it takes remaining height */}
-                    <div className="booking-modal__slots-section">
-                        <p className="booking-modal__section-label">Intervale orare</p>
+                    <div className="rent-modal__slots-section">
+                        <p className="rent-modal__section-label">Intervale orare</p>
 
                         {availabilityLoading && (
-                            <div className="booking-modal__slots-loading">
-                                <div className="booking-modal__spinner" />
+                            <div className="rent-modal__slots-loading">
+                                <div className="rent-modal__spinner" />
                                 <span>Se verifică disponibilitatea...</span>
                             </div>
                         )}
 
                         {!availabilityLoading && error && (
-                            <div className="booking-modal__slots-empty">{error}</div>
+                            <div className="rent-modal__slots-empty">{error}</div>
                         )}
 
                         {!availabilityLoading && !error && allSlots.length === 0 && (
-                            <div className="booking-modal__slots-empty">
+                            <div className="rent-modal__slots-empty">
                                 Nu există intervale orare definite.
                             </div>
                         )}
 
                         {!availabilityLoading && !error && allSlots.length > 0 && (
-                            <div className="booking-modal__slots-wrap">  {/* ← scrolls here */}
+                            <div className="rent-modal__slots-wrap">  {/* ← scrolls here */}
                                 {allSlots.map((slot) => (
                                     <SlotItem
                                         key={slot.id}
@@ -171,16 +172,16 @@ function BookingModal({ open, onClose, spotId, spotDescription }: BookingModalPr
                 </div>
 
                 {/* Footer */}
-                <div className="booking-modal__footer">
-                    <p className="booking-modal__selection-info">
+                <div className="rent-modal__footer">
+                    <p className="rent-modal__selection-info">
                         <strong>{selectedSlots.length}</strong> interval{getLastLetter(selectedSlots.length)} selectat{getLastLetter(selectedSlots.length)}
                     </p>
-                    <div className="booking-modal__footer-actions">
-                        <button className="booking-modal__btn-cancel" onClick={onClose}>
+                    <div className="rent-modal__footer-actions">
+                        <button className="rent-modal__btn-cancel" onClick={onClose}>
                             Anulează
                         </button>
                         <button
-                            className="booking-modal__btn-confirm"
+                            className="rent-modal__btn-confirm"
                             onClick={handleConfirm}
                             disabled={selectedSlots.length === 0}
                         >
@@ -195,4 +196,4 @@ function BookingModal({ open, onClose, spotId, spotDescription }: BookingModalPr
     );
 }
 
-export default BookingModal;
+export default RentModal;
