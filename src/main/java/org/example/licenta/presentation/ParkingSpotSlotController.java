@@ -26,8 +26,9 @@ public class ParkingSpotSlotController {
     @GetMapping("/{spotId}/manage")
     public ResponseEntity<List<ParkingSpotSlotResponse>> getAllSlots(@PathVariable String spotId, @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date, Authentication authentication) throws AccessDeniedException {
         UUID ownerId = UUID.fromString(authentication.getName());
+        List<ParkingSpotSlotResponse> response = parkingSpotSlotService.getAllSlotsForDate(ownerId, UUID.fromString(spotId), date);
 
-        return ResponseEntity.ok(parkingSpotSlotService.getAllSlotsForDate(ownerId, UUID.fromString(spotId), date));
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{spotId}/availability")

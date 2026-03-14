@@ -1,0 +1,78 @@
+/* ── Wrapper ─────────────────────────────────────────────────── */
+.hero {
+    position: relative;
+    background: linear-gradient(to right, #9333ea, #2563eb);
+    height: 100vh;
+    color: white;
+    overflow: hidden;
+}
+
+/* ── Background layer ────────────────────────────────────────── */
+.hero__background {
+    position: absolute;
+    inset: 0;
+}
+
+.hero__bg-image {
+    object-fit: cover;
+    object-position: center;
+    width: 100%;
+    height: 100%;
+}
+
+.hero__overlay {
+    position: absolute;
+    inset: 0;
+    background-color: black;
+    opacity: 0.5;
+}
+
+/* ── Content ─────────────────────────────────────────────────── */
+.hero__content {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    text-align: center;
+}
+
+.hero__title {
+    font-size: 3rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+    padding: 0.25rem;
+}
+
+.hero__subtitle {
+    font-size: 1.125rem;
+    color: #d1d5db;
+    margin-bottom: 2rem;
+}
+
+/* ── CTA button ──────────────────────────────────────────────── */
+.hero__cta {
+    background-color: transparent;
+    border: 1px solid white;
+    color: white;
+    padding: 0.5rem 1.5rem;
+    border-radius: 9999px;
+    font-size: 1.125rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition:
+            background-color 0.3s ease,
+            border-color 0.3s ease,
+            transform 0.3s ease,
+            box-shadow 0.3s ease;
+}
+
+.hero__cta:hover {
+    background-color: #eab308;
+    border-color: transparent;
+    transform: scale(1.05);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}

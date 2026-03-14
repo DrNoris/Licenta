@@ -21,7 +21,7 @@ public class ParkingSpotImage {
     private UUID id;
 
     @Column(nullable = false)
-    private String url;
+    private String publicId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parking_spot_id", nullable = false)

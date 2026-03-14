@@ -18,7 +18,7 @@ public class EmailService {
         message.setTo(toEmail);
         message.setSubject("Verify your email");
         message.setText("Click the link to verify your account: "
-                + frontendUrl + "#verify?token=" + token);
+                + frontendUrl + "verify?token=" + token);
         mailSender.send(message);
     }
 }

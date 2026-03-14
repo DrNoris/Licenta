@@ -10,7 +10,6 @@ public class ParkingSpotSlotResponse {
     private UUID id;
     private LocalDate date;
     private UUID parkingSpotId;
-    private Integer startHour;
-    private Integer endHour;
+    private UUID timeSlotId;
     private UUID bookingId;
 }

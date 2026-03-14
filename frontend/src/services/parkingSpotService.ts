@@ -1,0 +1,74 @@
+import { getToken } from "./authService";
+import type {ParkingSpot} from "../pages/ManageParkingSpots/ManageParkingSpots.types.ts";
+
+const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8080";
+
+function authHeaders(): HeadersInit {
+    return {
+        Authorization: `Bearer ${getToken()}`,
+    };
+}
+
+function jsonAuthHeaders(): HeadersInit {
+    return {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getToken()}`,
+    };
+}
+
+// ── Get all my parking spots ──────────────────────────────────
+export async function getMyParkingSpots(): Promise<ParkingSpot[]> {
+    const res = await fetch(`${API_BASE}/api/parking-spot/manage`, {
+        headers: jsonAuthHeaders(),
+    });
+    if (!res.ok) throw new Error("Nu s-au putut încărca locurile de parcare.");
+    return res.json();
+}
+
+// ── Add a parking spot (multipart) ───────────────────────────
+// Sends spot data as a JSON part + images as file parts
+export async function addParkingSpot(
+    spot: Omit<ParkingSpot, "id" | "imageUrls">,
+    files: File[]
+): Promise<ParkingSpot> {
+    const formData = new FormData();
+
+    // Spot data as a JSON blob part — backend reads as @RequestPart("data")
+    formData.append(
+        "data",
+        new Blob([JSON.stringify(spot)], { type: "application/json" })
+    );
+
+    // Each file as a separate part — backend reads as @RequestPart("images")
+    files.forEach((file) => formData.append("images", file));
+
+    const res = await fetch(`${API_BASE}/api/parking-spot`, {
+        method: "POST",
+        headers: authHeaders(), // NO Content-Type — browser sets multipart boundary automatically
+        body: formData,
+    });
+
+    if (!res.ok) throw new Error("Adăugarea a eșuat.");
+    return res.json();
+}
+
+// ── Delete a parking spot ─────────────────────────────────────
+export async function deleteParkingSpot(id: string): Promise<void> {
+    const res = await fetch(`${API_BASE}/api/parking-spot/${id}`, {
+        method: "DELETE",
+        headers: jsonAuthHeaders(),
+    });
+    if (!res.ok) throw new Error("Ștergerea a eșuat.");
+}
+
+// ── Fetch signed image URLs for an authorized user ────────────
+// Backend checks if user owns the spot or has an active booking,
+// then returns short-lived Cloudinary signed URLs
+export async function getSignedImageUrls(spotId: string): Promise<string[]> {
+    const res = await fetch(`${API_BASE}/api/parking-spot/${spotId}/images`, {
+        headers: jsonAuthHeaders(),
+    });
+    if (res.status === 403) return []; // not authorized — show lock
+    if (!res.ok) throw new Error("Nu s-au putut încărca imaginile.");
+    return res.json(); // string[] of signed URLs
+}

@@ -9,6 +9,9 @@ import org.example.licenta.domain.model.*;
 import org.example.licenta.infrastructure.repository.ParkingSpotRepository;
 import org.example.licenta.infrastructure.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
@@ -16,36 +19,67 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class ParkingSpotService {
+
     private final ParkingSpotRepository parkingSpotRepository;
     private final UserRepository userRepository;
-
     private final ParkingSpotMapper parkingSpotMapper;
+    private final CloudinaryService cloudinaryService;
 
     public List<ParkingSpotResponse> getAllSpots() {
-        return parkingSpotRepository.findAll().stream().map(parkingSpotMapper::toResponse).toList();
+        return parkingSpotRepository.findAll().stream()
+                .map(parkingSpotMapper::toResponse).toList();
     }
 
     public List<ParkingSpotResponse> getAllSpots(UUID ownerId) {
-        return parkingSpotRepository.findByOwnerId(ownerId).stream().map(parkingSpotMapper::toResponse).toList();
+        return parkingSpotRepository.findByOwnerId(ownerId).stream()
+                .map(parkingSpotMapper::toResponse).toList();
     }
 
-
     public ParkingSpotResponse getSpotById(UUID spotId) {
-        ParkingSpot parkingSpot = parkingSpotRepository.findById(spotId).orElseThrow(() -> new NoSuchElementException("Parking spot does not exist"));
-
-        return parkingSpotMapper.toResponse(parkingSpot);
+        return parkingSpotMapper.toResponse(
+                parkingSpotRepository.findById(spotId)
+                        .orElseThrow(() -> new NoSuchElementException("Parking spot does not exist"))
+        );
     }
 
     @Transactional
-    public ParkingSpotResponse createParkingSpot(CreateParkingSpotRequest request, UUID ownerId) {
+    public ParkingSpotResponse createParkingSpot(CreateParkingSpotRequest request, List<MultipartFile> images, UUID ownerId) throws IOException {
         User owner = userRepository.findById(ownerId)
                 .orElseThrow(() -> new NoSuchElementException("User not found"));
 
-        ParkingSpot newParkingSpot = parkingSpotMapper.toEntity(request, owner);
+        ParkingSpot spot = parkingSpotMapper.toEntity(request, owner);
+        spot = parkingSpotRepository.save(spot); // save first to get the ID
 
-        newParkingSpot.getImages().forEach(image -> image.setParkingSpot(newParkingSpot));
+        if (images != null) {
+            for (MultipartFile file : images) {
+                String publicId = cloudinaryService.uploadPrivate(
+                        file, "parking-spots/" + spot.getId()
+                );
+                ParkingSpotImage image = ParkingSpotImage.builder()
+                        .publicId(publicId)
+                        .parkingSpot(spot)
+                        .build();
+                spot.getImages().add(image);
+            }
+            parkingSpotRepository.save(spot);
+        }
 
-        ParkingSpot saved = parkingSpotRepository.save(newParkingSpot);
-        return parkingSpotMapper.toResponse(saved);
+        return parkingSpotMapper.toResponse(spot);
+    }
+
+    // Called by /images endpoint — returns signed URLs only for authorized users
+    public List<String> getSignedImageUrls(UUID spotId) {
+        ParkingSpot spot = parkingSpotRepository.findById(spotId)
+                .orElseThrow(() -> new NoSuchElementException("Parking spot does not exist"));
+
+        return spot.getImages().stream()
+                .map(img -> cloudinaryService.generateSignedUrl(img.getPublicId()))
+                .toList();
+    }
+
+    public boolean isOwner(UUID spotId, UUID userId) {
+        return parkingSpotRepository.findById(spotId)
+                .map(spot -> spot.getOwner().getId().equals(userId))
+                .orElse(false);
     }
 }

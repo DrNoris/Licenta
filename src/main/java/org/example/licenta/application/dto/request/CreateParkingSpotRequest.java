@@ -11,5 +11,4 @@ public class CreateParkingSpotRequest {
     private Double pricePerDay;
     private Double latitude;
     private Double longitude;
-    private List<String> imageUrls;
 }

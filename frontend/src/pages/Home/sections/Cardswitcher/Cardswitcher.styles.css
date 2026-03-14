@@ -1,0 +1,154 @@
+/* ── Section wrapper ─────────────────────────────────────────── */
+.card-switcher {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2.5rem 1rem;
+    width: 100%;
+    box-sizing: border-box;
+    background-color: #ffffff;
+}
+
+/* ── Card stack container ────────────────────────────────────── */
+.card-switcher__stage {
+    position: relative;
+    width: 17.5rem;
+}
+
+@media (min-width: 640px) {
+    .card-switcher__stage {
+        width: 21.5rem;
+    }
+}
+
+@media (min-width: 768px) {
+    .card-switcher__stage {
+        width: 30rem;
+    }
+}
+
+/* ── Individual card ─────────────────────────────────────────── */
+/*
+  Instead of absolute positioning all cards on top of each other,
+  we stack them via CSS: only the active card is visible and takes up space.
+  Inactive cards are hidden with visibility:hidden + position:absolute
+  so they don't affect layout but transitions still work.
+*/
+.card-switcher__card {
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid #4b5563;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    box-sizing: border-box;
+}
+
+@media (min-width: 640px) {
+    .card-switcher__card {
+        padding: 2rem;
+    }
+}
+
+.card-switcher__card--blue {
+    background-color: #1e40af;
+}
+
+.card-switcher__card--white {
+    background-color: #ffffff;
+}
+
+/* ── Card title ──────────────────────────────────────────────── */
+.card-switcher__title {
+    margin-bottom: 1rem;
+    font-size: 2.25rem;
+    font-weight: 500;
+}
+
+@media (min-width: 768px) {
+    .card-switcher__title {
+        font-size: 3rem;
+    }
+}
+
+.card-switcher__title--white {
+    color: #1e40af;
+}
+
+.card-switcher__title--blue {
+    color: #ffffff;
+}
+
+/* ── Feature list ────────────────────────────────────────────── */
+.card-switcher__list {
+    list-style: none;
+    padding: 0;
+    margin: 1.75rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+/* ── List item ───────────────────────────────────────────────── */
+.card-switcher__item {
+    display: flex;
+    align-items: center;
+}
+
+.card-switcher__item--strikethrough {
+    text-decoration: line-through;
+    text-decoration-color: #6b7280;
+}
+
+/* ── Icons ───────────────────────────────────────────────────── */
+.card-switcher__icon {
+    flex-shrink: 0;
+    width: 1rem;
+    height: 1rem;
+}
+
+.card-switcher__icon--check {
+    color: #1d4ed8;
+}
+
+.card-switcher__icon--cross {
+    color: #9ca3af;
+}
+
+/* ── Item text ───────────────────────────────────────────────── */
+.card-switcher__item-text {
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.4;
+    color: #6b7280;
+    margin-left: 0.75rem;
+}
+
+@media (min-width: 768px) {
+    .card-switcher__item-text {
+        font-size: 1.5rem;
+    }
+}
+
+/* ── Navigation buttons ──────────────────────────────────────── */
+.card-switcher__controls {
+    margin-top: 1.5rem;
+    display: flex;
+    gap: 1rem;
+}
+
+.card-switcher__btn {
+    background-color: #1f2937;
+    color: #ffffff;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 9999px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+}
+
+.card-switcher__btn:hover {
+    background-color: #4b5563;
+}
