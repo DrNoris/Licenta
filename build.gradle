@@ -52,6 +52,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-cache'
 
 	implementation 'com.cloudinary:cloudinary-http44:1.36.0'
+
+	implementation 'com.stripe:stripe-java:25.1.0'
 }
 
 tasks.named('test') {

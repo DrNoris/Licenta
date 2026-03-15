@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface ParkingSpotSlotRepository extends JpaRepository<ParkingSpotSlot, UUID> {
@@ -20,6 +21,8 @@ public interface ParkingSpotSlotRepository extends JpaRepository<ParkingSpotSlot
     List<ParkingSpotSlot> findByParkingSpotId(UUID spotId);
 
     void deleteByParkingSpotIdAndDateAndBookingIsNull(UUID spotId, LocalDate date);
+
+    Optional<ParkingSpotSlot> findByParkingSpotIdAndTimeSlotIdAndDate(UUID spotId, UUID timeSlotId, LocalDate date);
 
     @Query("""
     SELECT COUNT(s) > 0 FROM ParkingSpotSlot s

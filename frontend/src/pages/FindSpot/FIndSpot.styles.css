@@ -1,0 +1,475 @@
+/* ── Page wrapper ────────────────────────────────────────────── */
+.find-spot {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* ── Map ─────────────────────────────────────────────────────── */
+.find-spot__map {
+    flex: 1;
+    width: 100%;
+    z-index: 0;
+}
+
+/* ── Top filter bar ──────────────────────────────────────────── */
+.find-spot__filters {
+    position: absolute;
+    top: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 50;
+    background-color: #ffffff;
+    border-radius: 9999px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: nowrap;
+    max-width: calc(100vw - 2rem);
+}
+
+.find-spot__filter-divider {
+    width: 1px;
+    height: 1.5rem;
+    background-color: #e5e7eb;
+    flex-shrink: 0;
+}
+
+.find-spot__filter-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #374151;
+    padding: 0.35rem 0.6rem;
+    border-radius: 9999px;
+    white-space: nowrap;
+    transition: background-color 0.15s;
+}
+
+.find-spot__filter-btn:hover {
+    background-color: #f3f4f6;
+}
+
+.find-spot__filter-btn--active {
+    background-color: #eff6ff;
+    color: #1e40af;
+}
+
+.find-spot__filter-input {
+    border: none;
+    outline: none;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #374151;
+    width: 7rem;
+    background: transparent;
+}
+
+.find-spot__filter-price-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.find-spot__filter-price-input {
+    border: none;
+    outline: none;
+    font-size: 0.85rem;
+    width: 3.5rem;
+    background: transparent;
+    color: #374151;
+}
+
+/* ── Search in area button ───────────────────────────────────── */
+.find-spot__search-btn {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 50;
+    background-color: #1e40af;
+    color: #ffffff;
+    border: none;
+    border-radius: 9999px;
+    padding: 0.65rem 1.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background-color 0.2s, transform 0.2s;
+    white-space: nowrap;
+}
+
+.find-spot__search-btn:hover:not(:disabled) {
+    background-color: #1d3a8a;
+    transform: translateX(-50%) scale(1.03);
+}
+
+.find-spot__search-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.find-spot__search-btn--hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* ── Time slot panel (dropdown) ──────────────────────────────── */
+.find-spot__slot-panel {
+    position: absolute;
+    top: 4.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 50;
+    background-color: #ffffff;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    padding: 1rem;
+    width: 20rem;
+    max-height: 16rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.find-spot__slot-panel-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.25rem;
+}
+
+.find-spot__slot-chip {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0.75rem;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #374151;
+    transition: border-color 0.15s, background-color 0.15s;
+    user-select: none;
+}
+
+.find-spot__slot-chip:hover {
+    border-color: #93c5fd;
+    background-color: #eff6ff;
+}
+
+.find-spot__slot-chip--selected {
+    border-color: #1e40af;
+    background-color: #eff6ff;
+    color: #1e40af;
+}
+
+/* ── Marker ──────────────────────────────────────────────────── */
+.find-spot__marker {
+    background-color: #1e40af;
+    color: #ffffff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.3rem 0.6rem;
+    border-radius: 9999px;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+    cursor: pointer;
+    border: 2px solid #ffffff;
+    transition: transform 0.15s, background-color 0.15s;
+}
+
+.find-spot__marker:hover,
+.find-spot__marker--active {
+    background-color: #111827;
+    transform: scale(1.1);
+}
+
+/* ── Spot popup ──────────────────────────────────────────────── */
+.spot-popup {
+    position: absolute;
+    bottom: 5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 50;
+    background-color: #ffffff;
+    border-radius: 0.75rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+    width: 20rem;
+    overflow: hidden;
+    animation: popup-in 0.2s ease;
+}
+
+@keyframes popup-in {
+    from { opacity: 0; transform: translateX(-50%) translateY(8px); }
+    to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.spot-popup__image {
+    width: 100%;
+    height: 10rem;
+    object-fit: cover;
+    background-color: #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9ca3af;
+}
+
+.spot-popup__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.spot-popup__body {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.spot-popup__description {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 0;
+}
+
+.spot-popup__address {
+    font-size: 0.8rem;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin: 0;
+}
+
+.spot-popup__prices {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.25rem;
+}
+
+.spot-popup__price {
+    display: flex;
+    flex-direction: column;
+}
+
+.spot-popup__price-label {
+    font-size: 0.65rem;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.spot-popup__price-value {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #1e40af;
+}
+
+.spot-popup__actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.spot-popup__btn-close {
+    flex: 0;
+    padding: 0.5rem;
+    background-color: #f3f4f6;
+    border: none;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    color: #6b7280;
+    transition: background-color 0.2s;
+}
+
+.spot-popup__btn-close:hover {
+    background-color: #e5e7eb;
+}
+
+.spot-popup__btn-book {
+    flex: 1;
+    padding: 0.5rem 1rem;
+    background-color: #1e40af;
+    color: #ffffff;
+    border: 1px solid #1e40af;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.spot-popup__btn-book:hover {
+    background-color: #ffffff;
+    color: #1e40af;
+}
+
+/* ── Highlighted date button (before selection) ──────────────── */
+.find-spot__filter-btn--highlighted {
+    background-color: #1e40af;
+    color: #ffffff;
+}
+
+.find-spot__filter-btn--highlighted:hover {
+    background-color: #1d3a8a;
+}
+
+/* ── Hidden date input ───────────────────────────────────────── */
+.find-spot__filter-input--hidden {
+    position: absolute;
+    width: 0;
+    height: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* ── Empty / no results hint ─────────────────────────────────── */
+.find-spot__hint {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    background-color: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(4px);
+    padding: 1.5rem 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    color: #6b7280;
+    text-align: center;
+    pointer-events: none;
+}
+
+.find-spot__hint p {
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin: 0;
+    max-width: 16rem;
+}
+
+.find-spot__hint--no-results {
+    color: #9ca3af;
+}
+
+/* ── Spot popup header ───────────────────────────────────────── */
+.spot-popup__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+/* ── Slots section ───────────────────────────────────────────── */
+.spot-popup__slots {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-top: 0.25rem;
+}
+
+.spot-popup__slots-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin: 0;
+}
+
+.spot-popup__slots-empty {
+    font-size: 0.8rem;
+    color: #9ca3af;
+    margin: 0;
+}
+
+.spot-popup__slots-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.spot-popup__slot-chip {
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 0.2rem 0.6rem;
+    background-color: #eff6ff;
+    color: #1e40af;
+    border-radius: 9999px;
+    border: 1px solid #bfdbfe;
+    white-space: nowrap;
+}
+
+/* ── Slot chips — horizontal scrollable ──────────────────────── */
+.spot-popup__slots-list {
+    display: flex;
+    flex-direction: row;
+    gap: 0.4rem;
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+    scrollbar-width: none; /* Firefox */
+}
+
+.spot-popup__slots-list::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+}
+
+.spot-popup__slot-chip {
+    flex-shrink: 0;
+    font-size: 0.78rem;
+    font-weight: 500;
+    padding: 0.3rem 0.7rem;
+    background-color: #f3f4f6;
+    color: #374151;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 9999px;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: border-color 0.15s, background-color 0.15s, color 0.15s;
+}
+
+.spot-popup__slot-chip:hover {
+    border-color: #93c5fd;
+    background-color: #eff6ff;
+    color: #1e40af;
+}
+
+.spot-popup__slot-chip--selected {
+    background-color: #1e40af;
+    color: #ffffff;
+    border-color: #1e40af;
+}
+
+.spot-popup__slot-chip--selected:hover {
+    background-color: #1d3a8a;
+    border-color: #1d3a8a;
+    color: #ffffff;
+}

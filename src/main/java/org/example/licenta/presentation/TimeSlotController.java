@@ -19,6 +19,8 @@ public class TimeSlotController {
 
     @GetMapping
     public ResponseEntity<List<TimeSlotResponse>> getAllSlots() {
-        return ResponseEntity.status(HttpStatus.OK).body(timeSlotService.getAllSlots());
+        List<TimeSlotResponse> response = timeSlotService.getAllSlots();
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

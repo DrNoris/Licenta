@@ -1,5 +1,6 @@
 import { getToken } from "./authService";
 import type {ParkingSpot} from "../pages/ManageParkingSpots/ManageParkingSpots.types.ts";
+import type {FindSpotSearchParams} from "../pages/FindSpot/FindSpot.types.ts";
 
 const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8080";
 
@@ -9,7 +10,7 @@ function authHeaders(): HeadersInit {
     };
 }
 
-function jsonAuthHeaders(): HeadersInit {
+export function jsonAuthHeaders(): HeadersInit {
     return {
         "Content-Type": "application/json",
         Authorization: `Bearer ${getToken()}`,
@@ -49,31 +50,6 @@ export async function addParkingSpot(
     });
 
     if (!res.ok) throw new Error("Adăugarea a eșuat.");
-    return res.json();
-}
-
-// ── Edit a parking spot ───────────────────────────────────────
-export async function editParkingSpot(
-    spotId: string,
-    spot: { description: string; pricePerHour: number; pricePerDay: number },
-    files: File[]
-): Promise<ParkingSpot> {
-    const formData = new FormData();
-
-    formData.append(
-        "data",
-        new Blob([JSON.stringify(spot)], { type: "application/json" })
-    );
-
-    files.forEach((file) => formData.append("images", file));
-
-    const res = await fetch(`${API_BASE}/api/parking-spot/${spotId}`, {
-        method: "PUT",
-        headers: authHeaders(),
-        body: formData,
-    });
-
-    if (!res.ok) throw new Error("Editarea a eșuat.");
     return res.json();
 }
 
@@ -130,4 +106,28 @@ export async function getSignedImageUrls(spotId: string): Promise<string[]> {
     if (res.status === 403) return []; // not authorized — show lock
     if (!res.ok) throw new Error("Nu s-au putut încărca imaginile.");
     return res.json(); // string[] of signed URLs
+}
+
+// ── Search parking spots in bounding box ─────────────────────
+export async function searchParkingSpots(params: FindSpotSearchParams): Promise<ParkingSpot[]> {
+    const { boundingBox, filters } = params;
+
+    const query = new URLSearchParams({
+        swLat: boundingBox.swLat.toString(),
+        swLng: boundingBox.swLng.toString(),
+        neLat: boundingBox.neLat.toString(),
+        neLng: boundingBox.neLng.toString(),
+        ...(filters.date && { date: filters.date }),
+        ...(filters.minPricePerHour && { minPricePerHour: filters.minPricePerHour }),
+        ...(filters.maxPricePerHour && { maxPricePerHour: filters.maxPricePerHour }),
+    });
+
+    filters.timeSlotIds.forEach((id) => query.append("timeSlotIds", id));
+
+    const res = await fetch(`${API_BASE}/api/parking-spot`, {
+        headers: jsonAuthHeaders(),
+    });
+
+    if (!res.ok) throw new Error("Căutarea a eșuat.");
+    return res.json();
 }

@@ -31,7 +31,7 @@ function Header() {
                             {/*    alt="Messages"*/}
                             {/*/>*/}
                             <Link to="/find_spot">
-                                <button className="btn-primary">REZERVĂ</button>
+                                <button className="btn-primary">HARTĂ</button>
                             </Link>
                             <Link to="/manage">
                                 <button className="btn-outline">ÎNCHIREAZĂ</button>

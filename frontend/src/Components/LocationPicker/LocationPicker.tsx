@@ -8,7 +8,12 @@ import "./LocationPicker.styles.css";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
-import type {LatLng, LocationPickerProps, NominatimResult} from "./LocationPicker.types.ts";
+import {
+    DEFAULT_MAP_SETTINGS,
+    type LatLng,
+    type LocationPickerProps,
+    type NominatimResult
+} from "./LocationPicker.types.ts";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error
@@ -43,8 +48,6 @@ export async function reverseGeocode(latlng: LatLng) {
     }
 }
 
-const DEFAULT_CENTER: LatLng = { lat: 46.769379, lng: 23.589954 };
-
 function LocationPicker({ value, onChange, disabled = false }: LocationPickerProps) {
     const mapContainerRef: React.RefObject<HTMLDivElement | null> = useRef<HTMLDivElement>(null);
     const mapRef: React.RefObject<L.Map | null> = useRef<L.Map | null>(null);
@@ -59,7 +62,7 @@ function LocationPicker({ value, onChange, disabled = false }: LocationPickerPro
     useEffect(() => {
         if (!mapContainerRef.current || mapRef.current) return;
 
-        const map = L.map(mapContainerRef.current).setView([DEFAULT_CENTER.lat, DEFAULT_CENTER.lng], 14);
+        const map = L.map(mapContainerRef.current, DEFAULT_MAP_SETTINGS);
 
         L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
             attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
