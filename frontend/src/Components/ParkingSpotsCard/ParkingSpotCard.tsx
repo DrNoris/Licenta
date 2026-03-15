@@ -7,7 +7,7 @@ import RentModal from "../Modals/RentModal/RentModal.tsx";
 import DeleteModal from "../Modals/DeleteModal/DeleteModal.tsx";
 import EditSpotModal from "../Modals/EditSpotModal/EditSpotModal.tsx";
 
-function ParkingSpotCard({ spot, onDelete, onAddTimeSlot, onEdit, isOwner = false }: ParkingSpotCardProps) {
+function ParkingSpotCard({ spot, onDelete, onUpdateTimeSlots, onEdit, isOwner = false }: ParkingSpotCardProps) {
     const [imageState, setImageState] = useState<ImageAccessState>("idle");
     const [signedUrls, setSignedUrls] = useState<string[]>([]);
     const [activeImage, setActiveImage] = useState(0);
@@ -81,7 +81,7 @@ function ParkingSpotCard({ spot, onDelete, onAddTimeSlot, onEdit, isOwner = fals
                 <Pencil size={15}/>
             </button>)
 
-        if (onAddTimeSlot)
+        if (onUpdateTimeSlots)
             buttons.push(<button
                 className="spot-card__btn spot-card__btn__add-time-slot"
                 onClick={() => setAddTimeSlotModal(true)} //on click trebuie sa deschida un modal de add time slot ce sa primeasca ca params functia de onadd
@@ -102,7 +102,7 @@ function ParkingSpotCard({ spot, onDelete, onAddTimeSlot, onEdit, isOwner = fals
         </div>
     }
 
-    return (
+    return (<>
         <div className="spot-card">
             {/* ── Image area ─────────────────────────────────────────── */}
             <div className="spot-card__image-wrap">
@@ -171,33 +171,35 @@ function ParkingSpotCard({ spot, onDelete, onAddTimeSlot, onEdit, isOwner = fals
                 </div>
             </div>
 
-            {onAddTimeSlot && (
-                <RentModal
-                    isOpen={addTimeSlotModal}
-                    spotId={spot.id}
-                    onAddTimeSlot={onAddTimeSlot}
-                    onClose={() => setAddTimeSlotModal(false)}
-                    spotDescription={spot.description}/>
-            )}
-            {onDelete && (
-                <DeleteModal
-                    isOpen={deleteParkingSpotModal}
-                    spotId={spot.id}
-                    onDelete={onDelete}
-                    onClose={() => setDeleteParkingSpotModal(false)}
-                />
-            )}
-            {onEdit && (
-                <EditSpotModal
-                    isOpen={editParkingSpotModal}
-                    spot={spot}
-                    onClose={() => setEditParkingSpotModal(false)}
-                    onEdit={onEdit}
-                />
-            )}
             {/* ── Footer ─────────────────────────────────────────────── */}
             {getFooter(isOwner)}
         </div>
+
+        {onUpdateTimeSlots && (
+            <RentModal
+                isOpen={addTimeSlotModal}
+                spotId={spot.id}
+                onUpdateTimeSlots={onUpdateTimeSlots}
+                onClose={() => setAddTimeSlotModal(false)}
+                spotDescription={spot.description}/>
+        )}
+        {onDelete && (
+            <DeleteModal
+                isOpen={deleteParkingSpotModal}
+                spotId={spot.id}
+                onDelete={onDelete}
+                onClose={() => setDeleteParkingSpotModal(false)}
+            />
+        )}
+        {onEdit && (
+            <EditSpotModal
+                isOpen={editParkingSpotModal}
+                spot={spot}
+                onClose={() => setEditParkingSpotModal(false)}
+                onEdit={onEdit}
+            />
+        )}
+    </>
     );
 }
 

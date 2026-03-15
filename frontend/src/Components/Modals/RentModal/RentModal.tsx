@@ -1,91 +1,111 @@
 import React, { useEffect, useRef, useState } from "react";
-import {createPortal} from "react-dom";
+import { createPortal } from "react-dom";
 import { X, CalendarDays } from "lucide-react";
-import type {RentModalProps, ParkingSpotSlot, TimeSlot} from "./RentModal.types.ts";
+import type { RentModalProps, ParkingSpotSlot, TimeSlot } from "./RentModal.types.ts";
+import { SlotAvailabilityType } from "./RentModal.types.ts";
 import { formatDate, getAllTimeSlots, manageSlots } from "../../../services/rentService.ts";
 import SlotItem from "./Slotitem.tsx";
 import "./RentModal.styles.css";
-import {useBodyScrollLock} from "../../../hooks/useBodyScrollLock.ts";
+import { useBodyScrollLock } from "../../../hooks/useBodyScrollLock.ts";
 
-function RentModal({ isOpen, onClose, spotId, spotDescription, onAddTimeSlot }: RentModalProps) {
+function RentModal({ isOpen, onClose, spotId, spotDescription, onUpdateTimeSlots }: RentModalProps) {
     useBodyScrollLock(isOpen);
 
     const today = formatDate(new Date());
     const [selectedDate, setSelectedDate] = useState<string>(today);
-
     const [allSlots, setAllSlots] = useState<TimeSlot[]>([]);
-    const [slotsForSpotIds, setSlotsForSpotIds] = useState<Set<string>>(new Set());
+    const [slotsForSpot, setSlotsForSpot] = useState<ParkingSpotSlot[]>([]);
     const [availabilityLoading, setAvailabilityLoading] = useState(false);
-    const [selectedSlots, setSelectedSlots] = useState<TimeSlot[]>([]);
-    const [error, setError] = useState("");
 
-    // Track whether all slots have been fetched this session
+    // Slots selected by owner — split by intent
+    const [slotsToAdd, setSlotsToAdd] = useState<TimeSlot[]>([]);
+    const [slotsToDelete, setSlotsToDelete] = useState<TimeSlot[]>([]);
+
+    const [error, setError] = useState("");
     const allSlotsLoadedRef = useRef(false);
-    // Track the date we last fetched availability for — prevents duplicate fetches
     const lastFetchedDateRef = useRef<string>("");
 
-    // ── Load all slots once when modal first opens ────────────────
+    // ── Load all time slots once ──────────────────────────────
     useEffect(() => {
         if (!isOpen || allSlotsLoadedRef.current) return;
-
         getAllTimeSlots()
-            .then((slots) => {
-                setAllSlots(slots);
-                allSlotsLoadedRef.current = true;
-            })
-            .catch((err: unknown) => {
-                setError(err instanceof Error ? err.message : "Eroare la încărcarea intervalelor.");
-            });
+            .then((slots) => { setAllSlots(slots); allSlotsLoadedRef.current = true; })
+            .catch((err: unknown) => setError(err instanceof Error ? err.message : "Eroare la încărcarea intervalelor."));
     }, [isOpen]);
 
-    // ── Load availability when date changes ───────────────────────
-    // Using a ref for the date comparison avoids putting loadAvailability
-    // in the dependency array which caused the infinite loop
+    // ── Load spot slots when date changes ─────────────────────
     useEffect(() => {
+        console.log("pula")
         if (!isOpen) return;
         if (lastFetchedDateRef.current === selectedDate) return;
 
         lastFetchedDateRef.current = selectedDate;
         // eslint-disable-next-line react-hooks/set-state-in-effect
-        setSelectedSlots([]);
+        setSlotsToAdd([]);
+        setSlotsToDelete([]);
         setError("");
         setAvailabilityLoading(true);
 
         manageSlots(spotId, selectedDate)
-            .then((data) => {
-                const takenIds = new Set<string>(data.map((parkingSpotSlot: ParkingSpotSlot) => parkingSpotSlot.timeSlotId));
-                setSlotsForSpotIds(takenIds);
-            })
+            .then((data: ParkingSpotSlot[]) => setSlotsForSpot(data))
             .catch((err: unknown) => {
                 setError(err instanceof Error ? err.message : "Eroare la verificarea disponibilității.");
-                setSlotsForSpotIds(new Set());
+                setSlotsForSpot([]);
             })
-            .finally(() => {
-                setAvailabilityLoading(false);
-            });
+            .finally(() => setAvailabilityLoading(false));
     }, [isOpen, selectedDate, spotId]);
 
-    // ── Reset when modal closes so next open is fresh ─────────────
+    // ── Reset on close ────────────────────────────────────────
     useEffect(() => {
         if (!isOpen) {
             lastFetchedDateRef.current = "";
             // eslint-disable-next-line react-hooks/set-state-in-effect
             setSelectedDate(today);
-            setSelectedSlots([]);
+            setSlotsToAdd([]);
+            setSlotsToDelete([]);
             setError("");
         }
     }, [isOpen]);
 
+    const getSlotType = (slot: TimeSlot): SlotAvailabilityType | undefined => {
+        const spotSlot = slotsForSpot.find((s) => s.timeSlotId === slot.id);
+        if (!spotSlot)
+            return SlotAvailabilityType.AVAILABLE;
+        if (spotSlot.bookingId)
+            return SlotAvailabilityType.BOOKED;
+        return SlotAvailabilityType.OFFERED;
+    };
+
     const handleToggle = (slot: TimeSlot): void => {
-        setSelectedSlots((prev) =>
-            prev.find((s) => s.id === slot.id)
-                ? prev.filter((s) => s.id !== slot.id)
-                : [...prev, slot]
-        );
+        const type = getSlotType(slot);
+
+        if (type === SlotAvailabilityType.BOOKED) return; // cannot interact
+
+        if (type === SlotAvailabilityType.OFFERED) {
+            // Toggle for deletion
+            setSlotsToDelete((prev) =>
+                prev.find((s) => s.id === slot.id)
+                    ? prev.filter((s) => s.id !== slot.id)
+                    : [...prev, slot]
+            );
+        } else {
+            // Toggle for addition
+            setSlotsToAdd((prev) =>
+                prev.find((s) => s.id === slot.id)
+                    ? prev.filter((s) => s.id !== slot.id)
+                    : [...prev, slot]
+            );
+        }
+    };
+
+    const isSelected = (slot: TimeSlot): boolean => {
+        const type = getSlotType(slot);
+        if (type === SlotAvailabilityType.OFFERED) return !!slotsToDelete.find((s) => s.id === slot.id);
+        return !!slotsToAdd.find((s) => s.id === slot.id);
     };
 
     const handleConfirm = (): void => {
-        onAddTimeSlot(spotId, selectedDate, selectedSlots)
+        onUpdateTimeSlots(spotId, selectedDate, slotsToAdd, slotsToDelete);
         onClose();
     };
 
@@ -93,9 +113,14 @@ function RentModal({ isOpen, onClose, spotId, spotDescription, onAddTimeSlot }: 
         if (e.target === e.currentTarget) onClose();
     };
 
-    const getLastLetter = (length: number): string => {
-        return length > 1 || length== 0 ? "e" : ""
-    }
+    const hasChanges = slotsToAdd.length > 0 || slotsToDelete.length > 0;
+
+    const summaryText = (): string => {
+        const parts: string[] = [];
+        if (slotsToAdd.length > 0) parts.push(`+${slotsToAdd.length} de adăugat`);
+        if (slotsToDelete.length > 0) parts.push(`-${slotsToDelete.length} de șters`);
+        return parts.length > 0 ? parts.join(" · ") : "Nicio modificare";
+    };
 
     if (!isOpen) return null;
 
@@ -106,7 +131,7 @@ function RentModal({ isOpen, onClose, spotId, spotDescription, onAddTimeSlot }: 
                 {/* Header */}
                 <div className="rent-modal__header">
                     <div>
-                        <h3 className="rent-modal__title">Închireaza loc</h3>
+                        <h3 className="rent-modal__title">Gestionează intervale</h3>
                         <p className="rent-modal__subtitle">{spotDescription}</p>
                     </div>
                     <button className="rent-modal__close" onClick={onClose} aria-label="Închide">
@@ -116,8 +141,6 @@ function RentModal({ isOpen, onClose, spotId, spotDescription, onAddTimeSlot }: 
 
                 {/* Body */}
                 <div className="rent-modal__body">
-
-                    {/* Date picker */}
                     <div>
                         <p className="rent-modal__section-label">
                             <CalendarDays size={13} style={{ display: "inline", marginRight: "0.3rem" }} />
@@ -132,8 +155,6 @@ function RentModal({ isOpen, onClose, spotId, spotDescription, onAddTimeSlot }: 
                         />
                     </div>
 
-                    {/* Slots */}
-                    {/* Slots — wrap in slots-section so it takes remaining height */}
                     <div className="rent-modal__slots-section">
                         <p className="rent-modal__section-label">Intervale orare</p>
 
@@ -149,32 +170,32 @@ function RentModal({ isOpen, onClose, spotId, spotDescription, onAddTimeSlot }: 
                         )}
 
                         {!availabilityLoading && !error && allSlots.length === 0 && (
-                            <div className="rent-modal__slots-empty">
-                                Nu există intervale orare definite.
-                            </div>
+                            <div className="rent-modal__slots-empty">Nu există intervale orare definite.</div>
                         )}
 
                         {!availabilityLoading && !error && allSlots.length > 0 && (
-                            <div className="rent-modal__slots-wrap">  {/* ← scrolls here */}
-                                {allSlots.map((slot) => (
-                                    <SlotItem
-                                        key={slot.id}
-                                        slot={slot}
-                                        isAvailable={!slotsForSpotIds.has(slot.id)}
-                                        isSelected={!!selectedSlots.find((s) => s.id === slot.id)}
-                                        onToggle={handleToggle}
-                                    />
-                                ))}
+                            <div className="rent-modal__slots-wrap">
+                                {allSlots.map((slot) => {
+                                    const slotType = getSlotType(slot);
+                                    return (
+                                        <SlotItem
+                                            key={slot.id}
+                                            slot={slot}
+                                            slotAvailabilityType={slotType}
+                                            isSelected={isSelected(slot)}
+                                            onToggle={handleToggle}
+                                        />
+                                    );
+                                })}
                             </div>
                         )}
                     </div>
-
                 </div>
 
                 {/* Footer */}
                 <div className="rent-modal__footer">
                     <p className="rent-modal__selection-info">
-                        <strong>{selectedSlots.length}</strong> interval{getLastLetter(selectedSlots.length)} selectat{getLastLetter(selectedSlots.length)}
+                        <strong>{summaryText()}</strong>
                     </p>
                     <div className="rent-modal__footer-actions">
                         <button className="rent-modal__btn-cancel" onClick={onClose}>
@@ -183,9 +204,9 @@ function RentModal({ isOpen, onClose, spotId, spotDescription, onAddTimeSlot }: 
                         <button
                             className="rent-modal__btn-confirm"
                             onClick={handleConfirm}
-                            disabled={selectedSlots.length === 0}
+                            disabled={!hasChanges}
                         >
-                            Confirmă oferta
+                            Salvează
                         </button>
                     </div>
                 </div>

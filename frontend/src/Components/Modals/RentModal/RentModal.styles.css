@@ -289,3 +289,52 @@
     opacity: 0.5;
     cursor: not-allowed;
 }
+
+/* ── Slot type variants ──────────────────────────────────────── */
+.slot-item--booked {
+    background-color: #f9fafb;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.slot-item--delete {
+    border-color: #fca5a5;
+    background-color: #fef2f2;
+}
+
+/* ── Badge variants ──────────────────────────────────────────── */
+.slot-item__badge {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.2rem 0.5rem;
+    border-radius: 9999px;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.slot-item__badge--addable {
+    background-color: #f3f4f6;
+    color: #6b7280;
+}
+
+.slot-item__badge--addable.slot-item__badge--active {
+    background-color: #dcfce7;
+    color: #16a34a;
+}
+
+.slot-item__badge--offered {
+    background-color: #dbeafe;
+    color: #1e40af;
+}
+
+.slot-item__badge--offered.slot-item__badge--active {
+    background-color: #fee2e2;
+    color: #dc2626;
+}
+
+.slot-item__badge--booked {
+    background-color: #fef9c3;
+    color: #854d0e;
+}

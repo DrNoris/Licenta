@@ -7,7 +7,7 @@ import "./ManageParkingSpots.styles.css"
 import Header from "../../Components/Header/Header.tsx";
 import AddSpotModal from "../../Components/Modals/AddSpotModal/AddSpotModal.tsx";
 import type {TimeSlot} from "../../Components/Modals/RentModal/RentModal.types.ts";
-import {addParkingSpotSlot} from "../../services/rentService.ts";
+import {addParkingSpotSlot, deleteParkingSpotSlot} from "../../services/rentService.ts";
 
 function ManageParkingSpots() {
     const [state, setState] = useState<ManagePageState>({
@@ -42,12 +42,20 @@ function ManageParkingSpots() {
         }
     };
 
-    const handleAddTimeSlot = async (parkingSpotId: string, selectedDate: string, timeSlots: TimeSlot[]): Promise<void> => {
+    const handleUpdateTimeSlot = async (parkingSpotId: string, selectedDate: string, slotsToAdd: TimeSlot[], slotsToDelete: TimeSlot[]): Promise<void> => {
         try {
-            const timeslotIds: string[] = timeSlots.map((timeSlot: TimeSlot) => timeSlot.id);
-            await addParkingSpotSlot(parkingSpotId, selectedDate, timeslotIds);
+            const timeSlotsToAddIds: string[] = slotsToAdd.map((timeSlot: TimeSlot) => timeSlot.id);
+            await addParkingSpotSlot(parkingSpotId, selectedDate, timeSlotsToAddIds);
         } catch (err: unknown) {
             const message = err instanceof Error ? err.message : "Adăugarea de oferta a eșuat.";
+            setState((prev) => ({ ...prev, error: message }));
+        }
+
+        try {
+            const timeSlotsToDeleteIds: string[] = slotsToDelete.map((timeSlot: TimeSlot) => timeSlot.id);
+            await deleteParkingSpotSlot(parkingSpotId, selectedDate, timeSlotsToDeleteIds);
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : "Ștergerea de oferta a eșuat.";
             setState((prev) => ({ ...prev, error: message }));
         }
     };
@@ -128,7 +136,7 @@ function ManageParkingSpots() {
                 {state.status === "idle" && state.spots.length > 0 && (
                     <div className="manage-page__grid">
                         {state.spots.map((spot) => (
-                            <ParkingSpotCard key={spot.id} spot={spot} onDelete={handleDelete} onAddTimeSlot={handleAddTimeSlot} onEdit={handleEdit(spot.id)} isOwner={true} />
+                            <ParkingSpotCard key={spot.id} spot={spot} onDelete={handleDelete} onUpdateTimeSlots={handleUpdateTimeSlot} onEdit={handleEdit(spot.id)} isOwner={true} />
                         ))}
                     </div>
                 )}
