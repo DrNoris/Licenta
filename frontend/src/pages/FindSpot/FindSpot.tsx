@@ -96,19 +96,6 @@ function FindSpot() {
         });
     }, []);
 
-    // ── Auto-search when filters change (only if date is set) ─
-    useEffect(() => {
-        if (!filters.date) {
-            // No date — clear markers
-            markersLayerRef.current?.clearLayers();
-            setSpots([]);
-            setHasSearched(false);
-            return;
-        }
-        // Date is set — auto-search with current bounding box
-        triggerSearch();
-    }, [filters.date, filters.timeSlotIds, filters.minPricePerHour, filters.maxPricePerHour]);
-
     // ── Render markers ────────────────────────────────────────
     useEffect(() => {
         if (!markersLayerRef.current) return;

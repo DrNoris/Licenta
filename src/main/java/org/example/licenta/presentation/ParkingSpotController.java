@@ -84,4 +84,21 @@ public class ParkingSpotController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<ParkingSpotResponse>> search(
+            @RequestParam Double swLat,
+            @RequestParam Double swLng,
+            @RequestParam Double neLat,
+            @RequestParam Double neLng,
+            @RequestParam(required = false) String date,
+            @RequestParam(required = false) List<String> timeSlotIds,
+            @RequestParam(required = false) Double minPricePerHour,
+            @RequestParam(required = false) Double maxPricePerHour
+    ) {
+        return ResponseEntity.ok(
+                parkingSpotService.search(swLat, swLng, neLat, neLng,
+                        date, timeSlotIds, minPricePerHour, maxPricePerHour)
+        );
+    }
 }

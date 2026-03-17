@@ -21,7 +21,7 @@ export const DEFAULT_CENTER: LatLng = { lat: 46.769379, lng: 23.589954 };
 
 export const DEFAULT_MAP_SETTINGS = {
     center: DEFAULT_CENTER,
-    zoom: 14,
+    zoom: 17,
     zoomControl: false,
     maxBounds: L.latLngBounds(
         L.latLng(46.728161, 23.454361),

@@ -152,6 +152,24 @@ public class ParkingSpotService {
                 .toList();
     }
 
+    public List<ParkingSpotResponse> search(
+            Double swLat, Double swLng, Double neLat, Double neLng,
+            String date, List<String> timeSlotIds,
+            Double minPrice, Double maxPrice
+    ) {
+        LocalDate parsedDate = date != null ? LocalDate.parse(date) : null;
+
+        List<UUID> parsedSlotIds = (timeSlotIds != null && !timeSlotIds.isEmpty())
+                ? timeSlotIds.stream().map(UUID::fromString).toList()
+                : null;
+
+        return parkingSpotRepository
+                .search(swLat, swLng, neLat, neLng, parsedDate, parsedSlotIds, minPrice, maxPrice)
+                .stream()
+                .map(parkingSpotMapper::toResponse)
+                .toList();
+    }
+
     private boolean isOwner(UUID spotId, UUID userId) {
         return parkingSpotRepository.findById(spotId)
                 .map(spot -> spot.getOwner().getId().equals(userId))

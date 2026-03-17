@@ -7,18 +7,15 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.example.licenta.application.dto.request.CreateCheckoutRequest;
 import org.example.licenta.domain.enums.BookingStatus;
-import org.example.licenta.domain.model.Booking;
-import org.example.licenta.domain.model.ParkingSpot;
-import org.example.licenta.domain.model.ParkingSpotSlot;
-import org.example.licenta.domain.model.User;
-import org.example.licenta.infrastructure.repository.BookingRepository;
-import org.example.licenta.infrastructure.repository.ParkingSpotRepository;
-import org.example.licenta.infrastructure.repository.ParkingSpotSlotRepository;
-import org.example.licenta.infrastructure.repository.UserRepository;
+import org.example.licenta.domain.enums.TransactionType;
+import org.example.licenta.domain.model.*;
+import org.example.licenta.infrastructure.repository.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -29,6 +26,8 @@ public class BookingService {
     private final ParkingSpotSlotRepository parkingSpotSlotRepository;
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
+    private final WalletRepository walletRepository;
+    private final WalletTransactionRepository walletTransactionRepository;
 
     @Value("${stripe.success-url}")
     private String successUrl;
@@ -87,20 +86,37 @@ public class BookingService {
         User client = userRepository.findById(userId)
                 .orElseThrow(() -> new NoSuchElementException("User not found"));
 
-        // Calculate total price
+        ParkingSpot spot = parkingSpotRepository.findById(spotId).orElseThrow();
+        User owner = spot.getOwner();
+        Wallet ownerWallet = walletRepository.findByUser(owner)
+                .orElseGet(() -> walletRepository.save(Wallet.builder()
+                        .user(owner)
+                        .balance(BigDecimal.ZERO)
+                        .build()));
+
         double totalPrice = timeSlotIds.size() * parkingSpotRepository
                 .findById(spotId)
                 .orElseThrow()
                 .getPricePerHour();
 
-        // Create one booking for all slots
+        ownerWallet.setBalance(ownerWallet.getBalance().add(BigDecimal.valueOf(totalPrice)));
+        walletRepository.save(ownerWallet);
+
         Booking booking = Booking.builder()
                 .client(client)
                 .totalPrice(totalPrice)
                 .status(BookingStatus.CONFIRMED)
                 .build();
+        bookingRepository.save(booking);
 
-        // Link each slot to this booking
+        walletTransactionRepository.save(WalletTransaction.builder()
+                .wallet(ownerWallet)
+                .amount(BigDecimal.valueOf(totalPrice))
+                .type(TransactionType.CREDIT)
+                .description("Booking " + booking.getId())
+                .createdAt(LocalDateTime.now())
+                .build());
+
         timeSlotIds.forEach(timeSlotId -> {
             ParkingSpotSlot slot = parkingSpotSlotRepository
                     .findByParkingSpotIdAndTimeSlotIdAndDate(
@@ -111,9 +127,7 @@ public class BookingService {
                     .orElseThrow(() -> new NoSuchElementException("Slot not found"));
 
             slot.setBooking(booking);
-            booking.getReservedSlots().add(slot);
+            parkingSpotSlotRepository.save(slot);
         });
-
-        bookingRepository.save(booking);
     }
 }

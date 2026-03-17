@@ -124,7 +124,7 @@ export async function searchParkingSpots(params: FindSpotSearchParams): Promise<
 
     filters.timeSlotIds.forEach((id) => query.append("timeSlotIds", id));
 
-    const res = await fetch(`${API_BASE}/api/parking-spot`, {
+    const res = await fetch(`${API_BASE}/api/parking-spot/search?${query}`, {
         headers: jsonAuthHeaders(),
     });
 
