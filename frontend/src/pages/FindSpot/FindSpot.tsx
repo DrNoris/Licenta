@@ -201,21 +201,16 @@ function FindSpot() {
                 </Link>
 
                 {/* Date — gate filter */}
-                <button
-                    className={`find-spot__filter-btn ${filters.date ? "find-spot__filter-btn--active" : "find-spot__filter-btn--highlighted"}`}
-                    onClick={() => dateInputRef.current?.showPicker()}
-                >
+                <div className="find-spot__date-wrap">
                     <Calendar size={14}/>
-                    <span>{filters.date || "Selectează data"}</span>
                     <input
-                        ref={dateInputRef}
                         type="date"
-                        className="find-spot__filter-input--hidden"
+                        className="find-spot__date-input"
                         value={filters.date}
                         min={today}
                         onChange={(e) => setFilters((prev) => ({...prev, date: e.target.value}))}
                     />
-                </button>
+                </div>
 
                 {/* Only show remaining filters if date is selected */}
                 {filters.date && (
@@ -284,7 +279,7 @@ function FindSpot() {
                             className={`find-spot__slot-chip ${filters.timeSlotIds.includes(slot.id) ? "find-spot__slot-chip--selected" : ""}`}
                             onClick={() => toggleSlot(slot.id)}
                         >
-                            <span>{formatHour(slot.startHour)} → {formatHour(slot.endHour)}</span>
+                        <span>{formatHour(slot.startHour)} → {formatHour(slot.endHour)}</span>
                             {filters.timeSlotIds.includes(slot.id) && <X size={12}/>}
                         </div>
                     ))}

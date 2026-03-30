@@ -66,11 +66,12 @@ function Header() {
                 <nav className="header__nav-mobile">
                     {isAuthenticated() ? (
                         <>
-                            <button className="btn-primary btn-primary--wide">NOTIFICĂRI</button>
-                            <button className="btn-primary btn-primary--wide">MESAJE</button>
-                            <button className="btn-primary btn-primary--wide">CONT</button>
 
-                            <hr className="header__divider" />
+                            <Link to="/bookings" onClick={() => setIsOpen(false)}>
+                                <button className="btn-primary btn-primary--wide">REZERVĂRI</button>
+                            </Link>
+                            {/*<button className="btn-primary btn-primary--wide">MESAJE</button>*/}
+                            {/*<button className="btn-primary btn-primary--wide">CONT</button>*/}
 
                             <Link to="/find_spot" onClick={() => setIsOpen(false)}>
                                 <button className="btn-primary btn-primary--wide">HARTĂ</button>
@@ -78,10 +79,17 @@ function Header() {
                             <Link to="/manage" onClick={() => setIsOpen(false)}>
                                 <button className="btn-outline btn-outline--wide">ÎNCHIREAZĂ</button>
                             </Link>
+
+                            <hr className="header__divider"/>
+
+                                <button className="btn-outline btn-outline--wide" onClick={() => {
+                                    setIsOpen(false);
+                                    logout();
+                                }}>SIGN OUT</button>
                         </>
                     ) : (
                         <>
-                            <Link to="/login" onClick={() => setIsOpen(false)}>
+                        <Link to="/login" onClick={() => setIsOpen(false)}>
                                 <button className="btn-primary btn-primary--wide">LOG IN</button>
                             </Link>
                             <Link to="/register" onClick={() => setIsOpen(false)}>

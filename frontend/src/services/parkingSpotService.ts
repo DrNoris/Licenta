@@ -3,6 +3,12 @@ import type {ParkingSpot} from "../pages/ManageParkingSpots/ManageParkingSpots.t
 import type {FindSpotSearchParams} from "../pages/FindSpot/FindSpot.types.ts";
 
 const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8080";
+interface CachedUrls {
+    urls: string[];
+    expiresAt: number;
+}
+const signedUrlCache = new Map<string, CachedUrls>();
+const expirationBUffer: number = 30000;
 
 function authHeaders(): HeadersInit {
     return {
@@ -99,13 +105,40 @@ export async function deleteParkingSpot(id: string): Promise<void> {
 // ── Fetch signed image URLs for an authorized user ────────────
 // Backend checks if user owns the spot or has an active booking,
 // then returns short-lived Cloudinary signed URLs
+function getExpiryFromUrl(url: string): number {
+    try {
+        const match = url.match(/[?&]expires_at=(\d+)/);
+        if (match) {
+            return parseInt(match[1]) * 1000;
+        }
+        return Date.now() + 4 * 60 * 1000;
+    } catch {
+        return Date.now() + 4 * 60 * 1000;
+    }
+}
+
 export async function getSignedImageUrls(spotId: string): Promise<string[]> {
+    const cached = signedUrlCache.get(spotId);
+    if (cached && cached.expiresAt > Date.now()) {
+        return cached.urls;
+    }
+
     const res = await fetch(`${API_BASE}/api/parking-spot/${spotId}/images`, {
         headers: jsonAuthHeaders(),
     });
-    if (res.status === 403) return []; // not authorized — show lock
+    if (res.status === 403) return [];
     if (!res.ok) throw new Error("Nu s-au putut încărca imaginile.");
-    return res.json(); // string[] of signed URLs
+
+    const urls: string[] = await res.json();
+
+    if (urls.length > 0) {
+        signedUrlCache.set(spotId, {
+            urls,
+            expiresAt: getExpiryFromUrl(urls[0]) - expirationBUffer
+        });
+    }
+
+    return urls;
 }
 
 // ── Search parking spots in bounding box ─────────────────────

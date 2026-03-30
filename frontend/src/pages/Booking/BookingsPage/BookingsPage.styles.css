@@ -1,0 +1,53 @@
+/* ── Page ────────────────────────────────────────────────────── */
+.bookings-page {
+    min-height: 100vh;
+    background-color: #f3f4f6;
+}
+
+.bookings-page__container {
+    max-width: 48rem;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+/* ── Header ──────────────────────────────────────────────────── */
+.bookings-page__title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0 0 0.25rem;
+}
+
+.bookings-page__subtitle {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 0 0 2rem;
+}
+
+/* ── Tabs ────────────────────────────────────────────────────── */
+.bookings-page__tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 2px solid #e5e7eb;
+    margin-bottom: 1.5rem;
+}
+
+.bookings-page__tab {
+    padding: 0.6rem 1.25rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #6b7280;
+    background: none;
+    border: none;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: color 0.15s, border-color 0.15s;
+}
+
+.bookings-page__tab:hover { color: #111827; }
+
+.bookings-page__tab--active {
+    color: #1e40af;
+    border-bottom-color: #1e40af;
+}

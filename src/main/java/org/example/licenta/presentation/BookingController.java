@@ -8,8 +8,13 @@ import com.stripe.net.Webhook;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.example.licenta.application.dto.request.CreateCheckoutRequest;
+import org.example.licenta.application.dto.response.BookingResponse;
 import org.example.licenta.application.service.BookingService;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -40,37 +45,42 @@ public class BookingController {
     }
 
     @PostMapping("/webhook")
-    public ResponseEntity<Void> webhook(
-            HttpServletRequest request,
-            @RequestHeader("Stripe-Signature") String sigHeader) {
+    public ResponseEntity<Void> webhook(HttpServletRequest request, @RequestHeader("Stripe-Signature") String sigHeader) {
         try {
             byte[] bytes = request.getInputStream().readAllBytes();
             String payload = new String(bytes, StandardCharsets.UTF_8);
 
             Event event = Webhook.constructEvent(payload, sigHeader, webhookSecret);
 
-            log.info("Event type raw: '{}'", event.getType());
-            log.info("Event type length: {}", event.getType().length());
-            log.info("Equals check: {}", "checkout.session.completed".equals(event.getType()));
-
             switch (event.getType()) {
                 case "checkout.session.completed" -> {
-                    log.info("ENTERED checkout.session.completed");
-
                     EventDataObjectDeserializer deserializer = event.getDataObjectDeserializer();
                     Session session = (Session) deserializer.deserializeUnsafe();
 
                     bookingService.fulfillBooking(session);
                 }
-
-                default -> log.info("Unhandled event: '{}'", event.getType());
             }
-
             return ResponseEntity.ok().build();
         } catch (Exception e) {
-            log.error("WEBHOOK EXCEPTION: {}", e.getMessage());
-            log.error("Stack trace: ", e);  // ← full stack trace
             return ResponseEntity.badRequest().build();
         }
+    }
+
+    @GetMapping("/upcoming")
+    public ResponseEntity<Page<BookingResponse>> getUpcoming(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size, Authentication authentication) {
+        UUID userId = UUID.fromString(authentication.getName());
+        Pageable pageable = PageRequest.of(page, size, Sort.by("reservedSlots.date").ascending());
+        Page<BookingResponse> result = bookingService.getUpcoming(userId, pageable);
+
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/archive")
+    public ResponseEntity<Page<BookingResponse>> getArchive(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size, Authentication authentication) {
+        UUID userId = UUID.fromString(authentication.getName());
+        Pageable pageable = PageRequest.of(page, size, Sort.by("reservedSlots.date").ascending());
+        Page<BookingResponse> result = bookingService.getArchive(userId, pageable);
+
+        return ResponseEntity.ok(result);
     }
 }

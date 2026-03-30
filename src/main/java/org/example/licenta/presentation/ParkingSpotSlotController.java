@@ -44,4 +44,12 @@ public class ParkingSpotSlotController {
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
+
+    @DeleteMapping("/{parkingSpotId}")
+    public ResponseEntity<Void> deleteParkingSpotAvailability(@PathVariable UUID parkingSpotId, @RequestBody AddAvailabilityRequest addAvailabilityRequest, Authentication authentication) throws AccessDeniedException {
+        UUID ownerId = UUID.fromString(authentication.getName());
+        parkingSpotSlotService.deleteParkingSpotAvailability(parkingSpotId, addAvailabilityRequest, ownerId);
+
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
 }

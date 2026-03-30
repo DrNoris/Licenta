@@ -19,6 +19,7 @@ import java.nio.file.AccessDeniedException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -75,6 +76,28 @@ public class ParkingSpotSlotService {
                     .build();
 
             parkingSpotSlotRepository.save(slot);
+        }
+    }
+
+    @Transactional
+    public void deleteParkingSpotAvailability(UUID parkingSpotId, AddAvailabilityRequest addAvailabilityRequest, UUID ownerId) throws AccessDeniedException {
+        ParkingSpot spot = parkingSpotRepository.findById(parkingSpotId)
+                .orElseThrow(() -> new NoSuchElementException("Parking spot not found"));
+
+        if (!spot.getOwner().getId().equals(ownerId)) {
+            throw new AccessDeniedException("You do not own this parking spot");
+        }
+
+        for (UUID timeSlotId : addAvailabilityRequest.getTimeSlotIds()) {
+            Optional<ParkingSpotSlot> parkingSpotSlot = parkingSpotSlotRepository
+                    .findByParkingSpotIdAndTimeSlotIdAndDate(
+                            parkingSpotId, timeSlotId, addAvailabilityRequest.getDate());
+
+            if(!parkingSpotSlot.isPresent())
+                continue;
+
+            if(parkingSpotSlot.get().getBooking() == null)
+                parkingSpotSlotRepository.delete(parkingSpotSlot.get());
         }
     }
 }

@@ -33,6 +33,8 @@ public class ParkingSpotService {
     private final ParkingSpotMapper parkingSpotMapper;
     private final CloudinaryService cloudinaryService;
 
+    private final BookingService bookingService;
+
     public List<ParkingSpotResponse> getAllSpots() {
         return parkingSpotRepository.findAll().stream()
                 .map(this::toResponseWithImages)
@@ -138,9 +140,9 @@ public class ParkingSpotService {
 
     public List<String> getSignedImageUrls(UUID requesterId, UUID spotId) throws AccessDeniedException {
         boolean isOwner = isOwner(spotId, requesterId);
-        // boolean hasPaid = bookingService.hasActiveBooking(spotUUID, requesterId); // add later
+        boolean hasPaid = bookingService.hasActiveBooking(spotId, requesterId);
 
-        if (!isOwner /* && !hasPaid */) {
+        if (!isOwner  && !hasPaid) {
             //dau 403 sau pot da niste poze placeholder ca sa imi fie mai scalabil codul
             throw new AccessDeniedException("You do not have permission to see these imagines");
         }

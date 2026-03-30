@@ -5,12 +5,18 @@ import com.stripe.model.checkout.Session;
 import com.stripe.param.checkout.SessionCreateParams;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.example.licenta.application.dto.mapper.BookingMapper;
 import org.example.licenta.application.dto.request.CreateCheckoutRequest;
+import org.example.licenta.application.dto.response.BookingResponse;
 import org.example.licenta.domain.enums.BookingStatus;
 import org.example.licenta.domain.enums.TransactionType;
 import org.example.licenta.domain.model.*;
 import org.example.licenta.infrastructure.repository.*;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -28,6 +34,8 @@ public class BookingService {
     private final BookingRepository bookingRepository;
     private final WalletRepository walletRepository;
     private final WalletTransactionRepository walletTransactionRepository;
+
+    private final BookingMapper bookingMapper;
 
     @Value("${stripe.success-url}")
     private String successUrl;
@@ -129,5 +137,30 @@ public class BookingService {
             slot.setBooking(booking);
             parkingSpotSlotRepository.save(slot);
         });
+    }
+
+    public Page<BookingResponse> getUpcoming(UUID userId, Pageable pageable) {
+        Pageable sorted = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                Sort.by("id").ascending()
+        );
+
+        return bookingRepository.findUpcomingByUserId(userId, LocalDate.now(), sorted).map(bookingMapper::toResponse);
+    }
+
+    public Page<BookingResponse> getArchive(UUID userId, Pageable pageable) {
+        Pageable sorted = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                Sort.by("id").ascending()
+        );
+
+        return bookingRepository.findArchiveByUserId(userId, LocalDate.now(), sorted).map(bookingMapper::toResponse);
+    }
+
+
+    public boolean hasActiveBooking(UUID spotId, UUID requesterId){
+        return bookingRepository.hasActiveBooking(spotId, requesterId, LocalDate.now());
     }
 }

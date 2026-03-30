@@ -33,9 +33,7 @@ function RentModal({ isOpen, onClose, spotId, spotDescription, onUpdateTimeSlots
             .catch((err: unknown) => setError(err instanceof Error ? err.message : "Eroare la încărcarea intervalelor."));
     }, [isOpen]);
 
-    // ── Load spot slots when date changes ─────────────────────
     useEffect(() => {
-        console.log("pula")
         if (!isOpen) return;
         if (lastFetchedDateRef.current === selectedDate) return;
 

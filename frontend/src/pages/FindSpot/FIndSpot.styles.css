@@ -41,6 +41,7 @@
 }
 
 .find-spot__filter-btn {
+    position: relative;
     background: none;
     border: none;
     cursor: pointer;
@@ -93,7 +94,7 @@
 /* ── Search in area button ───────────────────────────────────── */
 .find-spot__search-btn {
     position: absolute;
-    bottom: 2rem;
+    bottom: 8rem;
     left: 50%;
     transform: translateX(-50%);
     z-index: 50;
@@ -334,6 +335,31 @@
 
 .find-spot__filter-btn--highlighted:hover {
     background-color: #1d3a8a;
+}
+
+.find-spot__date-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.6rem;
+    border-radius: 9999px;
+    background-color: #1e40af;
+    color: #ffffff;
+}
+
+.find-spot__date-wrap:has(.find-spot__date-input:not(:placeholder-shown)) {
+    background-color: #eff6ff;
+    color: #1e40af;
+}
+
+.find-spot__date-input {
+    border: none;
+    outline: none;
+    font-size: 0.85rem;
+    font-weight: 500;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
 }
 
 /* ── Hidden date input ───────────────────────────────────────── */
