@@ -8,6 +8,6 @@ import java.util.UUID;
 
 @Data
 public class AddAvailabilityRequest {
-    private LocalDate date;
+    private List<LocalDate> dates;
     private List<UUID> timeSlotIds;
 }

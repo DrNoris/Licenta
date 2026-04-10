@@ -15,7 +15,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findByClientId(UUID clientId);
 
     @Query("""
-    SELECT DISTINCT b FROM Booking b
+    SELECT b FROM Booking b
     JOIN b.reservedSlots s
     WHERE b.client.id = :userId
     AND s.date >= :today

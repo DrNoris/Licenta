@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.licenta.application.dto.mapper.ParkingSpotMapper;
 import org.example.licenta.application.dto.request.CreateParkingSpotRequest;
 import org.example.licenta.application.dto.request.UpdateParkingSpotRequest;
+import org.example.licenta.application.dto.response.ParkingSpotOwnerResponse;
 import org.example.licenta.application.dto.response.ParkingSpotResponse;
 import org.example.licenta.domain.model.*;
 import org.example.licenta.infrastructure.repository.ParkingSpotRepository;
@@ -51,6 +52,16 @@ public class ParkingSpotService {
         ParkingSpot spot = parkingSpotRepository.findById(spotId)
                 .orElseThrow(() -> new NoSuchElementException("Parking spot does not exist"));
         return toResponseWithImages(spot);
+    }
+
+    public ParkingSpotOwnerResponse getSpotOwner(UUID id){
+        ParkingSpot spot = parkingSpotRepository.findById(id).orElseThrow();
+        ParkingSpotOwnerResponse response = new ParkingSpotOwnerResponse();
+        response.setOwnerId(spot.getOwner().getId());
+        response.setOwnerName(spot.getOwner().getUsername());
+        response.setSpotAddress(spot.getAddress());
+
+        return response;
     }
 
     @Transactional

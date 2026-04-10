@@ -17,10 +17,8 @@ import org.springframework.stereotype.Service;
 
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDate;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -50,54 +48,64 @@ public class ParkingSpotSlotService {
     }
 
     @Transactional
-    public void createParkingSpotAvailability(UUID parkingSpotId, AddAvailabilityRequest addAvailabilityRequest, UUID ownerId) throws AccessDeniedException {
+    public void createParkingSpotAvailability(UUID parkingSpotId, AddAvailabilityRequest request, UUID ownerId) throws AccessDeniedException {
         ParkingSpot spot = parkingSpotRepository.findById(parkingSpotId)
                 .orElseThrow(() -> new NoSuchElementException("Parking spot not found"));
 
-        if (!spot.getOwner().getId().equals(ownerId)) {
+        if (!spot.getOwner().getId().equals(ownerId))
             throw new AccessDeniedException("You do not own this parking spot");
+
+        // Fetch existing slots in one query
+        Set<String> existing = parkingSpotSlotRepository
+                .findAllByParkingSpotIdAndTimeSlotIdInAndDateIn(
+                        parkingSpotId, request.getTimeSlotIds(), request.getDates()
+                )
+                .stream()
+                .map(s -> s.getDate() + "_" + s.getTimeSlot().getId())
+                .collect(Collectors.toSet());
+
+        List<TimeSlot> timeSlots = timeSlotRepository.findAllById(request.getTimeSlotIds());
+        Map<UUID, TimeSlot> timeSlotMap = timeSlots.stream()
+                .collect(Collectors.toMap(TimeSlot::getId, ts -> ts));
+
+        List<ParkingSpotSlot> toSave = new ArrayList<>();
+
+        for (LocalDate date : request.getDates()) {
+            for (UUID timeSlotId : request.getTimeSlotIds()) {
+                String key = date + "_" + timeSlotId;
+                if (existing.contains(key)) continue;
+
+                toSave.add(ParkingSpotSlot.builder()
+                        .parkingSpot(spot)
+                        .timeSlot(timeSlotMap.get(timeSlotId))
+                        .date(date)
+                        .booking(null)
+                        .build());
+            }
         }
 
-        for (UUID timeSlotId : addAvailabilityRequest.getTimeSlotIds()) {
-            boolean alreadyExists = parkingSpotSlotRepository
-                    .existsByParkingSpotIdAndTimeSlotIdAndDate(
-                            parkingSpotId, timeSlotId, addAvailabilityRequest.getDate());
-
-            if (alreadyExists) continue;
-
-            TimeSlot timeSlot = timeSlotRepository.findById(timeSlotId)
-                    .orElseThrow(() -> new NoSuchElementException("TimeSlot not found: " + timeSlotId));
-
-            ParkingSpotSlot slot = ParkingSpotSlot.builder()
-                    .parkingSpot(spot)
-                    .timeSlot(timeSlot)
-                    .date(addAvailabilityRequest.getDate())
-                    .booking(null)
-                    .build();
-
-            parkingSpotSlotRepository.save(slot);
-        }
+        parkingSpotSlotRepository.saveAll(toSave);
     }
 
     @Transactional
-    public void deleteParkingSpotAvailability(UUID parkingSpotId, AddAvailabilityRequest addAvailabilityRequest, UUID ownerId) throws AccessDeniedException {
+    public void deleteParkingSpotAvailability(UUID parkingSpotId, AddAvailabilityRequest request, UUID ownerId) throws AccessDeniedException {
         ParkingSpot spot = parkingSpotRepository.findById(parkingSpotId)
                 .orElseThrow(() -> new NoSuchElementException("Parking spot not found"));
 
-        if (!spot.getOwner().getId().equals(ownerId)) {
+        if (!spot.getOwner().getId().equals(ownerId))
             throw new AccessDeniedException("You do not own this parking spot");
-        }
 
-        for (UUID timeSlotId : addAvailabilityRequest.getTimeSlotIds()) {
-            Optional<ParkingSpotSlot> parkingSpotSlot = parkingSpotSlotRepository
-                    .findByParkingSpotIdAndTimeSlotIdAndDate(
-                            parkingSpotId, timeSlotId, addAvailabilityRequest.getDate());
+        List<ParkingSpotSlot> slotsToDelete = parkingSpotSlotRepository
+                .findAllByParkingSpotIdAndTimeSlotIdInAndDateIn(
+                        parkingSpotId,
+                        request.getTimeSlotIds(),
+                        request.getDates()
+                );
 
-            if(!parkingSpotSlot.isPresent())
-                continue;
+        List<ParkingSpotSlot> deletable = slotsToDelete.stream()
+                .filter(s -> s.getBooking() == null)
+                .toList();
 
-            if(parkingSpotSlot.get().getBooking() == null)
-                parkingSpotSlotRepository.delete(parkingSpotSlot.get());
-        }
+        parkingSpotSlotRepository.deleteAll(deletable);
     }
 }

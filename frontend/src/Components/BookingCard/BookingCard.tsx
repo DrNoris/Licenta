@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
-import { MapPin, ImageOff, Navigation } from "lucide-react";
+import {MapPin, ImageOff, Navigation, MessageSquare} from "lucide-react";
 import type { TimeSlot } from "../../Components/Modals/RentModal/RentModal.types.ts";
 import { formatHour } from "../../services/rentService.ts";
 import { getSignedImageUrls } from "../../services/parkingSpotService.ts";
 import "./BookingCard.styles.css";
 import type {BookingCardProps} from "./BookingCard.types.ts";
+import {getOrCreateConversation} from "../../services/chatService.ts";
+import {useNavigate} from "react-router-dom";
 
 function BookingCard({ booking, onClick, isArchive }: BookingCardProps) {
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const navigate = useNavigate();
 
     // Fetch first signed image for preview
     useEffect(() => {
@@ -18,10 +21,14 @@ function BookingCard({ booking, onClick, isArchive }: BookingCardProps) {
             .catch(() => {});
     }, [booking.parkingSpot.id]);
 
+    const handleChat = async () => {
+        const conv = await getOrCreateConversation(booking.parkingSpot.id);
+        navigate(`/chat/${conv.id}`);
+    };
+
     const mapsUrl = `https://www.google.com/maps?q=${booking.parkingSpot.latitude},${booking.parkingSpot.longitude}`;
 
-    return (
-        <div className="booking-card" onClick={() => onClick?.(booking)}>
+    return (<div className="booking-card" onClick={() => onClick?.(booking)}>
             {/* Preview image */}
             {!isArchive && (<div className="booking-card__image">
                 {previewUrl ? (
@@ -53,16 +60,24 @@ function BookingCard({ booking, onClick, isArchive }: BookingCardProps) {
                     <span className="booking-card__price">
                         {booking.totalPrice.toFixed(2)} lei
                     </span>
-                    {!isArchive && (<a
-                        href={mapsUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="booking-card__maps-btn"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <Navigation size={12}/>
-                        Maps
-                    </a>)}
+                    {!isArchive && (
+                        <>
+                            <button className="booking-card__chat-btn" onClick={handleChat}>
+                                <MessageSquare size={12}/>
+                                Chat
+                            </button>
+                            <a
+                                href={mapsUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="booking-card__maps-btn"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <Navigation size={12}/>
+                                Maps
+                            </a>
+                        </>
+                    )}
                 </div>
             </div>
         </div>

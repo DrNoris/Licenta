@@ -38,13 +38,11 @@ function FindSpot() {
     const [hasSearched, setHasSearched] = useState(false);
     const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
 
-    // Keep filters in a ref so map event handlers always see latest value
     const filtersRef = useRef<FindSpotFilters>(EMPTY_FILTERS);
     filtersRef.current = filters;
 
     const today = formatDate(new Date());
 
-    // Fetch available slots when a spot is selected
     useEffect(() => {
         if (!selectedSpot || !filters.date) {
             setAvailableSlots([]);
@@ -57,7 +55,7 @@ function FindSpot() {
             })
             .catch(() => setAvailableSlots([]));
     }, [selectedSpot, filters.date]);
-    // ── Init map ──────────────────────────────────────────────
+
     useEffect(() => {
         if (!mapContainerRef.current || mapRef.current) return;
 
@@ -72,11 +70,9 @@ function FindSpot() {
         markersLayerRef.current = L.layerGroup().addTo(map);
 
         map.on("movestart", () => {
-            // Only show search button if a date is already selected
             if (filtersRef.current.date) setMapMoved(true);
         });
 
-        // Close popup and slot panel on map click
         map.on("click", () => {
             setSelectedSpot(null);
             setShowSlotPanel(false);
@@ -90,13 +86,11 @@ function FindSpot() {
         };
     }, []);
 
-    // ── Load all time slots for filter ────────────────────────
     useEffect(() => {
         getAllTimeSlots().then(setAllTimeSlots).catch(() => {
         });
     }, []);
 
-    // ── Render markers ────────────────────────────────────────
     useEffect(() => {
         if (!markersLayerRef.current) return;
         markersLayerRef.current.clearLayers();
@@ -123,7 +117,6 @@ function FindSpot() {
         });
     }, [spots, selectedSpot]);
 
-    // ── Search ────────────────────────────────────────────────
     const triggerSearch = async (map?: L.Map) => {
         const m = map ?? mapRef.current;
         if (!m || !filtersRef.current.date) return;

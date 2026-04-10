@@ -31,4 +31,16 @@ public interface ParkingSpotSlotRepository extends JpaRepository<ParkingSpotSlot
     AND s.date >= :today
     """)
     boolean hasUpcomingBookings(@Param("spotId") UUID spotId, @Param("today") LocalDate today);
+
+    @Query("""
+    SELECT s FROM ParkingSpotSlot s
+    WHERE s.parkingSpot.id = :spotId
+    AND s.timeSlot.id IN :timeSlotIds
+    AND s.date IN :dates
+""")
+    List<ParkingSpotSlot> findAllByParkingSpotIdAndTimeSlotIdInAndDateIn(
+            @Param("spotId")      UUID spotId,
+            @Param("timeSlotIds") List<UUID> timeSlotIds,
+            @Param("dates")       List<LocalDate> dates
+    );
 }

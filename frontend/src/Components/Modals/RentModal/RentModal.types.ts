@@ -33,5 +33,5 @@ export interface RentModalProps {
     onClose: () => void;
     spotId: string;
     spotDescription: string;
-    onUpdateTimeSlots: (spotId: string, date: string, slotsToAdd: TimeSlot[], slotsToDelete: TimeSlot[]) => void;
+    onUpdateTimeSlots: (spotId: string, dates: string[], slotsToAdd: TimeSlot[], slotsToDelete: TimeSlot[]) => void;
 }

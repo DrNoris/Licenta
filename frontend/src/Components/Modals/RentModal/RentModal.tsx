@@ -1,12 +1,56 @@
 import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { X, CalendarDays } from "lucide-react";
+import { X, CalendarDays, Repeat } from "lucide-react";
 import type { RentModalProps, ParkingSpotSlot, TimeSlot } from "./RentModal.types.ts";
 import { SlotAvailabilityType } from "./RentModal.types.ts";
 import { formatDate, getAllTimeSlots, manageSlots } from "../../../services/rentService.ts";
 import SlotItem from "./Slotitem.tsx";
 import "./RentModal.styles.css";
 import { useBodyScrollLock } from "../../../hooks/useBodyScrollLock.ts";
+
+type RecurrenceType = "none" | "daily" | "weekdays" | "weekly" | "biweekly";
+
+const RECURRENCE_LABELS: Record<RecurrenceType, string> = {
+    none:      "Selectează un interval din listă",
+    daily:     "În fiecare zi",
+    weekdays:  "Zilele lucrătoare",
+    weekly:    "Săptămânal",
+    biweekly:  "O dată la 2 săptămâni",
+};
+
+function generateDates(startDate: string, recurrence: RecurrenceType, stopDate: string): string[] {
+    if (recurrence === "none" || !stopDate) return [startDate];
+
+    const dates: string[] = [];
+    const start = new Date(startDate);
+    const stop = new Date(stopDate);
+
+    const current = new Date(start);
+
+    while (current <= stop) {
+        const dayOfWeek = current.getDay(); // 0=Sun, 6=Sat
+
+        if (recurrence === "daily") {
+            dates.push(formatDate(current));
+        } else if (recurrence === "weekdays" && dayOfWeek >= 1 && dayOfWeek <= 5) {
+            dates.push(formatDate(current));
+        } else if (recurrence === "weekly") {
+            if (current.getDay() === start.getDay()) {
+                dates.push(formatDate(current));
+            }
+        } else if (recurrence === "biweekly") {
+            const diffMs = current.getTime() - start.getTime();
+            const diffWeeks = Math.round(diffMs / (7 * 24 * 60 * 60 * 1000));
+            if (current.getDay() === start.getDay() && diffWeeks % 2 === 0) {
+                dates.push(formatDate(current));
+            }
+        }
+
+        current.setDate(current.getDate() + 1);
+    }
+
+    return dates.length > 0 ? dates : [startDate];
+}
 
 function RentModal({ isOpen, onClose, spotId, spotDescription, onUpdateTimeSlots }: RentModalProps) {
     useBodyScrollLock(isOpen);
@@ -17,13 +61,35 @@ function RentModal({ isOpen, onClose, spotId, spotDescription, onUpdateTimeSlots
     const [slotsForSpot, setSlotsForSpot] = useState<ParkingSpotSlot[]>([]);
     const [availabilityLoading, setAvailabilityLoading] = useState(false);
 
-    // Slots selected by owner — split by intent
     const [slotsToAdd, setSlotsToAdd] = useState<TimeSlot[]>([]);
     const [slotsToDelete, setSlotsToDelete] = useState<TimeSlot[]>([]);
+
+    const [recurrence, setRecurrence] = useState<RecurrenceType>("none");
+    const [stopDate, setStopDate] = useState<string>("");
+    const [recurrenceOpen, setRecurrenceOpen] = useState(false);
 
     const [error, setError] = useState("");
     const allSlotsLoadedRef = useRef(false);
     const lastFetchedDateRef = useRef<string>("");
+    const recurrenceRef = useRef<HTMLDivElement>(null);
+
+    const hasAdditions = slotsToAdd.length > 0;
+    const hasDeletions = slotsToDelete.length > 0;
+    const recurrenceActive = recurrence !== "none" && (hasAdditions || hasDeletions);
+    const selectedDates = recurrenceActive && stopDate
+        ? generateDates(selectedDate, recurrence, stopDate)
+        : [selectedDate];
+
+    // Close recurrence dropdown on outside click
+    useEffect(() => {
+        const handleClick = (e: MouseEvent) => {
+            if (recurrenceRef.current && !recurrenceRef.current.contains(e.target as Node)) {
+                setRecurrenceOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClick);
+        return () => document.removeEventListener("mousedown", handleClick);
+    }, []);
 
     // ── Load all time slots once ──────────────────────────────
     useEffect(() => {
@@ -33,6 +99,7 @@ function RentModal({ isOpen, onClose, spotId, spotDescription, onUpdateTimeSlots
             .catch((err: unknown) => setError(err instanceof Error ? err.message : "Eroare la încărcarea intervalelor."));
     }, [isOpen]);
 
+    // ── Load spot slots when date changes ─────────────────────
     useEffect(() => {
         if (!isOpen) return;
         if (lastFetchedDateRef.current === selectedDate) return;
@@ -61,33 +128,29 @@ function RentModal({ isOpen, onClose, spotId, spotDescription, onUpdateTimeSlots
             setSelectedDate(today);
             setSlotsToAdd([]);
             setSlotsToDelete([]);
+            setRecurrence("none");
+            setStopDate("");
             setError("");
         }
     }, [isOpen]);
 
-    const getSlotType = (slot: TimeSlot): SlotAvailabilityType | undefined => {
+    const getSlotType = (slot: TimeSlot): SlotAvailabilityType => {
         const spotSlot = slotsForSpot.find((s) => s.timeSlotId === slot.id);
-        if (!spotSlot)
-            return SlotAvailabilityType.AVAILABLE;
-        if (spotSlot.bookingId)
-            return SlotAvailabilityType.BOOKED;
+        if (!spotSlot) return SlotAvailabilityType.AVAILABLE;
+        if (spotSlot.bookingId) return SlotAvailabilityType.BOOKED;
         return SlotAvailabilityType.OFFERED;
     };
 
     const handleToggle = (slot: TimeSlot): void => {
         const type = getSlotType(slot);
-
-        if (type === SlotAvailabilityType.BOOKED) return; // cannot interact
-
+        if (type === SlotAvailabilityType.BOOKED) return;
         if (type === SlotAvailabilityType.OFFERED) {
-            // Toggle for deletion
             setSlotsToDelete((prev) =>
                 prev.find((s) => s.id === slot.id)
                     ? prev.filter((s) => s.id !== slot.id)
                     : [...prev, slot]
             );
         } else {
-            // Toggle for addition
             setSlotsToAdd((prev) =>
                 prev.find((s) => s.id === slot.id)
                     ? prev.filter((s) => s.id !== slot.id)
@@ -103,7 +166,7 @@ function RentModal({ isOpen, onClose, spotId, spotDescription, onUpdateTimeSlots
     };
 
     const handleConfirm = (): void => {
-        onUpdateTimeSlots(spotId, selectedDate, slotsToAdd, slotsToDelete);
+        onUpdateTimeSlots(spotId, selectedDates, slotsToAdd, slotsToDelete);
         onClose();
     };
 
@@ -115,8 +178,20 @@ function RentModal({ isOpen, onClose, spotId, spotDescription, onUpdateTimeSlots
 
     const summaryText = (): string => {
         const parts: string[] = [];
-        if (slotsToAdd.length > 0) parts.push(`+${slotsToAdd.length} de adăugat`);
-        if (slotsToDelete.length > 0) parts.push(`-${slotsToDelete.length} de șters`);
+        if (hasAdditions) {
+            if (recurrenceActive && stopDate && selectedDates.length > 1) {
+                parts.push(`+${slotsToAdd.length * selectedDates.length} intervale pe ${selectedDates.length} zile`);
+            } else {
+                parts.push(`+${slotsToAdd.length} de adăugat`);
+            }
+        }
+        if (hasDeletions) {
+            if (recurrenceActive && stopDate && selectedDates.length > 1) {
+                parts.push(`-${slotsToDelete.length * selectedDates.length} intervale pe ${selectedDates.length} zile`);
+            } else {
+                parts.push(`-${slotsToDelete.length} de șters`);
+            }
+        }
         return parts.length > 0 ? parts.join(" · ") : "Nicio modificare";
     };
 
@@ -139,6 +214,8 @@ function RentModal({ isOpen, onClose, spotId, spotDescription, onUpdateTimeSlots
 
                 {/* Body */}
                 <div className="rent-modal__body">
+
+                    {/* Date picker */}
                     <div>
                         <p className="rent-modal__section-label">
                             <CalendarDays size={13} style={{ display: "inline", marginRight: "0.3rem" }} />
@@ -153,6 +230,60 @@ function RentModal({ isOpen, onClose, spotId, spotDescription, onUpdateTimeSlots
                         />
                     </div>
 
+                    {/* Recurrence picker */}
+                    <div className="rent-modal__recurrence-wrap" ref={recurrenceRef}>
+                        <p className={`rent-modal__section-label ${!hasAdditions && !hasDeletions ? "rent-modal__section-label--disabled" : ""}`}>
+                            <Repeat size={13} style={{ display: "inline", marginRight: "0.3rem" }} />
+                            Recurență
+                        </p>
+
+                        {/* Custom dropdown */}
+                        <button
+                            className={`rent-modal__recurrence-btn ${recurrence !== "none" ? "rent-modal__recurrence-btn--active" : ""}`}
+                            onClick={() => (hasAdditions || hasDeletions) && setRecurrenceOpen((p) => !p)}
+                            disabled={!hasAdditions && !hasDeletions}
+                            type="button"
+                        >
+                            <Repeat size={13} />
+                            {RECURRENCE_LABELS[recurrence]}
+                            <span className="rent-modal__recurrence-chevron">{recurrenceOpen ? "▲" : "▼"}</span>
+                        </button>
+
+                        {recurrenceOpen && (
+                            <div className="rent-modal__recurrence-dropdown">
+                                {(Object.keys(RECURRENCE_LABELS) as RecurrenceType[]).map((key) => (
+                                    <button
+                                        key={key}
+                                        className={`rent-modal__recurrence-option ${recurrence === key ? "rent-modal__recurrence-option--selected" : ""}`}
+                                        onClick={() => { setRecurrence(key); setRecurrenceOpen(false); }}
+                                        type="button"
+                                    >
+                                        {RECURRENCE_LABELS[key]}
+                                        {recurrence === key && <span>✓</span>}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Stop date — only when recurrence is active */}
+                        {recurrence !== "none" && (hasAdditions || hasDeletions) && (
+                            <div className="rent-modal__stop-date">
+                                <p className="rent-modal__section-label" style={{ marginBottom: "0.3rem" }}>
+                                    <CalendarDays size={13} style={{ display: "inline", marginRight: "0.3rem" }} />
+                                    Până la
+                                </p>
+                                <input
+                                    type="date"
+                                    className="rent-modal__date-input"
+                                    value={stopDate}
+                                    min={selectedDate}
+                                    onChange={(e) => setStopDate(e.target.value)}
+                                />
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Slots */}
                     <div className="rent-modal__slots-section">
                         <p className="rent-modal__section-label">Intervale orare</p>
 
@@ -173,18 +304,15 @@ function RentModal({ isOpen, onClose, spotId, spotDescription, onUpdateTimeSlots
 
                         {!availabilityLoading && !error && allSlots.length > 0 && (
                             <div className="rent-modal__slots-wrap">
-                                {allSlots.map((slot) => {
-                                    const slotType = getSlotType(slot);
-                                    return (
-                                        <SlotItem
-                                            key={slot.id}
-                                            slot={slot}
-                                            slotAvailabilityType={slotType}
-                                            isSelected={isSelected(slot)}
-                                            onToggle={handleToggle}
-                                        />
-                                    );
-                                })}
+                                {allSlots.map((slot) => (
+                                    <SlotItem
+                                        key={slot.id}
+                                        slot={slot}
+                                        slotAvailabilityType={getSlotType(slot)}
+                                        isSelected={isSelected(slot)}
+                                        onToggle={handleToggle}
+                                    />
+                                ))}
                             </div>
                         )}
                     </div>

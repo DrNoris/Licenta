@@ -32,12 +32,12 @@ export async function getAllTimeSlots(): Promise<TimeSlot[]> {
     return slots;
 }
 
-export async function addParkingSpotSlot(parkingSpotId: string, selectedDate: string, timeslotIds: string[]): Promise<void> {
+export async function addParkingSpotSlot(parkingSpotId: string, selectedDates: string[], timeslotIds: string[]): Promise<void> {
     const res = await fetch(`${API_BASE}/api/parking-spot-slots/${parkingSpotId}`, {
         method: "POST",
         headers: authHeaders(),
         body: JSON.stringify({
-            date: selectedDate,
+            dates: selectedDates,
             timeSlotIds: timeslotIds,
         }),
     });
@@ -45,12 +45,12 @@ export async function addParkingSpotSlot(parkingSpotId: string, selectedDate: st
     if (!res.ok) throw new Error("Adăugarea a eșuat.");
 }
 
-export async function deleteParkingSpotSlot(parkingSpotId: string, selectedDate: string, timeslotIds: string[]): Promise<void> {
+export async function deleteParkingSpotSlot(parkingSpotId: string, selectedDates: string[], timeslotIds: string[]): Promise<void> {
     const res = await fetch(`${API_BASE}/api/parking-spot-slots/${parkingSpotId}`, {
         method: "DELETE",
         headers: authHeaders(),
         body: JSON.stringify({
-            date: selectedDate,
+            dates: selectedDates,
             timeSlotIds: timeslotIds,
         }),
     });

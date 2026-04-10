@@ -3,6 +3,7 @@ package org.example.licenta.presentation;
 import lombok.RequiredArgsConstructor;
 import org.example.licenta.application.dto.request.CreateParkingSpotRequest;
 import org.example.licenta.application.dto.request.UpdateParkingSpotRequest;
+import org.example.licenta.application.dto.response.ParkingSpotOwnerResponse;
 import org.example.licenta.application.dto.response.ParkingSpotResponse;
 import org.example.licenta.application.service.ParkingSpotService;
 import org.springframework.http.HttpStatus;
@@ -13,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,6 +32,13 @@ public class ParkingSpotController {
     @GetMapping("/{spotId}")
     public ResponseEntity<ParkingSpotResponse> getSpotById(@PathVariable String spotId) {
         return ResponseEntity.ok(parkingSpotService.getSpotById(UUID.fromString(spotId)));
+    }
+
+    @GetMapping("/{spotId}/owner")
+    public ResponseEntity<ParkingSpotOwnerResponse> getOwner(@PathVariable UUID spotId) {
+        ParkingSpotOwnerResponse response = parkingSpotService.getSpotOwner(spotId);
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/manage")

@@ -42,10 +42,10 @@ function ManageParkingSpots() {
         }
     };
 
-    const handleUpdateTimeSlot = async (parkingSpotId: string, selectedDate: string, slotsToAdd: TimeSlot[], slotsToDelete: TimeSlot[]): Promise<void> => {
+    const handleUpdateTimeSlot = async (parkingSpotId: string, selectedDates: string[], slotsToAdd: TimeSlot[], slotsToDelete: TimeSlot[]): Promise<void> => {
         try {
             const timeSlotsToAddIds: string[] = slotsToAdd.map((timeSlot: TimeSlot) => timeSlot.id);
-            await addParkingSpotSlot(parkingSpotId, selectedDate, timeSlotsToAddIds);
+            await addParkingSpotSlot(parkingSpotId, selectedDates, timeSlotsToAddIds);
         } catch (err: unknown) {
             const message = err instanceof Error ? err.message : "Adăugarea de oferta a eșuat.";
             setState((prev) => ({ ...prev, error: message }));
@@ -53,7 +53,7 @@ function ManageParkingSpots() {
 
         try {
             const timeSlotsToDeleteIds: string[] = slotsToDelete.map((timeSlot: TimeSlot) => timeSlot.id);
-            await deleteParkingSpotSlot(parkingSpotId, selectedDate, timeSlotsToDeleteIds);
+            await deleteParkingSpotSlot(parkingSpotId, selectedDates, timeSlotsToDeleteIds);
         } catch (err: unknown) {
             const message = err instanceof Error ? err.message : "Ștergerea de oferta a eșuat.";
             setState((prev) => ({ ...prev, error: message }));

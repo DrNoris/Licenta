@@ -159,7 +159,6 @@ public class BookingService {
         return bookingRepository.findArchiveByUserId(userId, LocalDate.now(), sorted).map(bookingMapper::toResponse);
     }
 
-
     public boolean hasActiveBooking(UUID spotId, UUID requesterId){
         return bookingRepository.hasActiveBooking(spotId, requesterId, LocalDate.now());
     }

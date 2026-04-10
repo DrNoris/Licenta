@@ -20,6 +20,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.util.Map;
 import java.util.UUID;
 
@@ -82,5 +83,12 @@ public class BookingController {
         Page<BookingResponse> result = bookingService.getArchive(userId, pageable);
 
         return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/api/bookings/validate")
+    public ResponseEntity<Boolean> validateBooking(@RequestParam UUID spotId, @RequestParam UUID buyerId) {
+        boolean valid = bookingService.hasActiveBooking(spotId, buyerId);
+
+        return ResponseEntity.ok(valid);
     }
 }

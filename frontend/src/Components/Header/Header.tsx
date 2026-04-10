@@ -30,6 +30,12 @@ function Header() {
                             {/*    src="https://icons.veryicon.com/png/o/miscellaneous/basic-icon/message-54.png"*/}
                             {/*    alt="Messages"*/}
                             {/*/>*/}
+                            <Link to="/bookings">
+                                <button className="btn-primary">REZERVĂRI</button>
+                            </Link>
+                            <Link to="/chat">
+                                <button className="btn-primary">CHAT</button>
+                            </Link>
                             <Link to="/find_spot">
                                 <button className="btn-primary">HARTĂ</button>
                             </Link>
@@ -69,6 +75,9 @@ function Header() {
 
                             <Link to="/bookings" onClick={() => setIsOpen(false)}>
                                 <button className="btn-primary btn-primary--wide">REZERVĂRI</button>
+                            </Link>
+                            <Link to="/chat">
+                                <button className="btn-primary">CHAT</button>
                             </Link>
                             {/*<button className="btn-primary btn-primary--wide">MESAJE</button>*/}
                             {/*<button className="btn-primary btn-primary--wide">CONT</button>*/}

@@ -338,3 +338,114 @@
     background-color: #fef9c3;
     color: #854d0e;
 }
+
+
+/* ── Recurrence wrap ─────────────────────────────────────────── */
+.rent-modal__recurrence-wrap {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.rent-modal__section-label--disabled {
+    opacity: 0.4;
+}
+
+/* ── Recurrence button ───────────────────────────────────────── */
+.rent-modal__recurrence-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 0.5rem;
+    background: #ffffff;
+    color: #374151;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: border-color 0.15s, background-color 0.15s;
+    text-align: left;
+    width: 100%;
+}
+
+.rent-modal__recurrence-btn:hover:not(:disabled) {
+    border-color: #93c5fd;
+    background-color: #f9fafb;
+}
+
+.rent-modal__recurrence-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.rent-modal__recurrence-btn--active {
+    border-color: #1e40af;
+    background-color: #eff6ff;
+    color: #1e40af;
+}
+
+.rent-modal__recurrence-chevron {
+    margin-left: auto;
+    font-size: 0.65rem;
+    opacity: 0.6;
+}
+
+/* ── Dropdown ────────────────────────────────────────────────── */
+.rent-modal__recurrence-dropdown {
+    position: absolute;
+    top: calc(100% + 0.25rem);
+    left: 0;
+    right: 0;
+    background: #ffffff;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    overflow: hidden;
+}
+
+.rent-modal__recurrence-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0.6rem 0.85rem;
+    background: none;
+    border: none;
+    font-size: 0.875rem;
+    color: #374151;
+    cursor: pointer;
+    text-align: left;
+    transition: background-color 0.1s;
+}
+
+.rent-modal__recurrence-option:hover {
+    background-color: #f3f4f6;
+}
+
+.rent-modal__recurrence-option--selected {
+    color: #1e40af;
+    font-weight: 600;
+    background-color: #eff6ff;
+}
+
+/* ── Stop date ───────────────────────────────────────────────── */
+.rent-modal__stop-date {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding-top: 0.25rem;
+}
+
+/* ── Recurrence summary ──────────────────────────────────────── */
+.rent-modal__recurrence-summary {
+    font-size: 0.78rem;
+    color: #1e40af;
+    background-color: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 0.375rem;
+    padding: 0.4rem 0.6rem;
+    margin-top: 0.25rem;
+}

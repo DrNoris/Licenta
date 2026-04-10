@@ -30,6 +30,7 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/bookings/validate").permitAll()
                         .requestMatchers("/api/bookings/webhook").permitAll()
                         .anyRequest().permitAll()
                 )
