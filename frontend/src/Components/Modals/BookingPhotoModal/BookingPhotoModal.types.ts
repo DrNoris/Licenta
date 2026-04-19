@@ -1,4 +1,4 @@
-import type {UpcomingBooking} from "../../../pages/UpcomingBookings/UpcomingBookings.types.ts";
+import type {UpcomingBooking} from "../../../pages/Booking/BookingsPage/BookingsPage.types.ts";
 
 export interface BookingPhotosModalProps {
     isOpen: boolean;

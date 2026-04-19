@@ -35,23 +35,21 @@ export async function getMyParkingSpots(): Promise<ParkingSpot[]> {
 // ── Add a parking spot (multipart) ───────────────────────────
 // Sends spot data as a JSON part + images as file parts
 export async function addParkingSpot(
-    spot: Omit<ParkingSpot, "id" | "imagePublicIds">,
+    spot: Omit<ParkingSpot, "id" | "imagePublicIds" | "availableNow">,
     files: File[]
 ): Promise<ParkingSpot> {
     const formData = new FormData();
 
-    // Spot data as a JSON blob part — backend reads as @RequestPart("data")
     formData.append(
         "data",
         new Blob([JSON.stringify(spot)], { type: "application/json" })
     );
 
-    // Each file as a separate part — backend reads as @RequestPart("images")
     files.forEach((file) => formData.append("images", file));
 
     const res = await fetch(`${API_BASE}/api/parking-spot`, {
         method: "POST",
-        headers: authHeaders(), // NO Content-Type — browser sets multipart boundary automatically
+        headers: authHeaders(),
         body: formData,
     });
 

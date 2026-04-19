@@ -55,9 +55,8 @@ function ChatThread({ conversation }: ChatThreadProps) {
 
         getMessages(conversation.id, 0)
             .then((data) => {
-                // API returns newest-first → reverse so oldest is at top
-                setMessages(data.content.toReversed());
-                setHasMorePages(!data.last);
+                setMessages([...data.content].reverse());
+                setHasMorePages(data.totalPages != 0);
                 setCurrentPage(0);
             })
             .catch(() => {})
@@ -82,7 +81,7 @@ function ChatThread({ conversation }: ChatThreadProps) {
 
         getMessages(conversation.id, nextPage)
             .then((data) => {
-                const olderMessages = data.content.toReversed();
+                const olderMessages = [...data.content].reverse();
 
                 setMessages((prev) => {
                     const existingIds = new Set(prev.map((m) => m.id));
@@ -93,7 +92,7 @@ function ChatThread({ conversation }: ChatThreadProps) {
                 });
 
                 setCurrentPage(nextPage);
-                setHasMorePages(!data.last);
+                setHasMorePages(data.totalPages != nextPage);
 
                 requestAnimationFrame(() => {
                     if (container) {
@@ -163,12 +162,15 @@ function ChatThread({ conversation }: ChatThreadProps) {
             ws.onmessage = (event) => {
                 try {
                     const msg: ChatMessage = JSON.parse(event.data);
-                    if ((msg as any).type === "ping") return;
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-expect-error
+                    if ((msg as unknown).type === "ping") return;
                     setMessages((prev) => {
                         if (prev.some((m) => m.id === msg.id)) return prev;
                         return [...prev, msg];
                     });
                 } catch {
+                    /* empty */
                 }
             };
 
