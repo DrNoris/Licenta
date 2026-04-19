@@ -7,6 +7,7 @@ export interface ParkingSpot {
     latitude: number;
     longitude: number;
     imagePublicIds: string[];
+    availableNow: boolean;
 }
 
 export type ManageStatus = "idle" | "loading" | "error";

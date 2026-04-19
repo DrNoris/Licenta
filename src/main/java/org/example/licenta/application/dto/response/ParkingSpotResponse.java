@@ -14,4 +14,5 @@ public class ParkingSpotResponse {
     private Double latitude;
     private Double longitude;
     private List<String> imagePublicIds;
+    private boolean availableNow;
 }

@@ -43,4 +43,6 @@ public interface ParkingSpotSlotRepository extends JpaRepository<ParkingSpotSlot
             @Param("timeSlotIds") List<UUID> timeSlotIds,
             @Param("dates")       List<LocalDate> dates
     );
+
+    boolean existsByParkingSpotIdAndTimeSlotIdAndDateAndBookingIsNull(UUID parkingSpotId, UUID timeSlotId, LocalDate date);
 }

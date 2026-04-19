@@ -499,3 +499,13 @@
     border-color: #1d3a8a;
     color: #ffffff;
 }
+
+.find-spot__marker--available-now {
+    background-color: #16a34a;
+    border-color: #ffffff;
+}
+
+.find-spot__marker--available-now:hover,
+.find-spot__marker--active.find-spot__marker--available-now {
+    background-color: #15803d;
+}

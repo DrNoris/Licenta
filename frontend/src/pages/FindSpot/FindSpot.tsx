@@ -97,7 +97,12 @@ function FindSpot() {
 
         spots.forEach((spot) => {
             const el = document.createElement("div");
-            el.className = `find-spot__marker ${selectedSpot?.id === spot.id ? "find-spot__marker--active" : ""}`;
+            const isActive = selectedSpot?.id === spot.id;
+            el.className = [
+                "find-spot__marker",
+                isActive ? "find-spot__marker--active" : "",
+                spot.availableNow ? "find-spot__marker--available-now" : "",
+            ].filter(Boolean).join(" ");
 
             const marker = L.marker([spot.latitude, spot.longitude], {
                 icon: L.divIcon({

@@ -10,6 +10,7 @@ import org.example.licenta.application.dto.response.ParkingSpotResponse;
 import org.example.licenta.domain.model.*;
 import org.example.licenta.infrastructure.repository.ParkingSpotRepository;
 import org.example.licenta.infrastructure.repository.ParkingSpotSlotRepository;
+import org.example.licenta.infrastructure.repository.TimeSlotRepository;
 import org.example.licenta.infrastructure.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
@@ -30,6 +32,7 @@ public class ParkingSpotService {
     private final ParkingSpotRepository parkingSpotRepository;
     private final ParkingSpotSlotRepository parkingSpotSlotRepository;
     private final UserRepository userRepository;
+    private final TimeSlotRepository timeSlotRepository;
 
     private final ParkingSpotMapper parkingSpotMapper;
     private final CloudinaryService cloudinaryService;
@@ -176,10 +179,26 @@ public class ParkingSpotService {
                 ? timeSlotIds.stream().map(UUID::fromString).toList()
                 : null;
 
+        LocalTime now = LocalTime.now();
+        int currentHour = now.getMinute() >= 45 ? now.getHour() + 1 : now.getHour();
+        UUID currentTimeSlotId = timeSlotRepository.findByHour(currentHour)
+                .map(TimeSlot::getId)
+                .orElse(null);
+
         return parkingSpotRepository
                 .search(swLat, swLng, neLat, neLng, parsedDate, parsedSlotIds, minPrice, maxPrice)
                 .stream()
-                .map(parkingSpotMapper::toResponse)
+                .map(spot -> {
+                    ParkingSpotResponse response = parkingSpotMapper.toResponse(spot);
+                    if (currentTimeSlotId != null && parsedSlotIds == null && parsedDate != null && parsedDate.equals(LocalDate.now())) {
+                        boolean availableNow = parkingSpotSlotRepository
+                                .existsByParkingSpotIdAndTimeSlotIdAndDateAndBookingIsNull(
+                                        spot.getId(), currentTimeSlotId, parsedDate
+                                );
+                        response.setAvailableNow(availableNow);
+                    }
+                    return response;
+                })
                 .toList();
     }
 
