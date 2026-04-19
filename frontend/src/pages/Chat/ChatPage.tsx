@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { MessageSquare, PanelLeft, Plus } from "lucide-react";
+import { MessageSquare, PanelLeft } from "lucide-react";
 import { useParams, useNavigate } from "react-router-dom";
 import Header from "../../Components/Header/Header.tsx";
 import { getConversations } from "../../services/chatService.ts";
