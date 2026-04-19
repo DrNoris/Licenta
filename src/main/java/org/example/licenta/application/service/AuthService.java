@@ -32,8 +32,9 @@ public class AuthService {
         User user = userMapper.toEntity(request);
 
         try {
+            user.setActivated(true);
             userRepository.save(user);
-            sendEmailConfirmation(user);
+            //sendEmailConfirmation(user);
         } catch (Exception e) {
             e.printStackTrace();
             throw e;
