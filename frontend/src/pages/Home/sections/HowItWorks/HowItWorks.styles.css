@@ -1,0 +1,58 @@
+/* ── Section wrapper ─────────────────────────────────────────── */
+.how-it-works {
+    padding: 4rem 0;
+    background-color: #ffffff;
+}
+
+/* ── Inner container ─────────────────────────────────────────── */
+.how-it-works__container {
+    width: 75%;
+    margin: 0 auto;
+    text-align: center;
+}
+
+/* ── Heading ─────────────────────────────────────────────────── */
+.how-it-works__heading {
+    font-size: 1.875rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+}
+
+/* ── Grid ────────────────────────────────────────────────────── */
+.how-it-works__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+}
+
+@media (min-width: 640px) {
+    .how-it-works__grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 1024px) {
+    .how-it-works__grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* ── Card ────────────────────────────────────────────────────── */
+.how-it-works__card {
+    background-color: #ffffff;
+    padding: 1.5rem;
+    border-radius: 0.25rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.how-it-works__card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.how-it-works__card-text {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #374151;
+}

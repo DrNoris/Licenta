@@ -1,0 +1,121 @@
+/* ── Card ────────────────────────────────────────────────────── */
+.booking-card {
+    display: flex;
+    gap: 1rem;
+    background-color: #ffffff;
+    border-radius: 0.75rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+    overflow: hidden;
+    cursor: pointer;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+    border: 1.5px solid #f3f4f6;
+}
+
+.booking-card:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+}
+
+/* ── Image ───────────────────────────────────────────────────── */
+.booking-card__image {
+    width: 7rem;
+    min-width: 7rem;
+    height: 7rem;
+    object-fit: cover;
+    background-color: #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9ca3af;
+    flex-shrink: 0;
+}
+
+.booking-card__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* ── Body ────────────────────────────────────────────────────── */
+.booking-card__body {
+    flex: 1;
+    padding: 0.85rem 0.85rem 0.85rem 0.85rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    min-width: 0;
+}
+
+.booking-card__address {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.booking-card__description {
+    font-size: 0.78rem;
+    color: #6b7280;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ── Slots ───────────────────────────────────────────────────── */
+.booking-card__slots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin-top: 0.2rem;
+}
+
+.booking-card__slot {
+    font-size: 0.72rem;
+    font-weight: 500;
+    padding: 0.15rem 0.5rem;
+    background-color: #eff6ff;
+    color: #1e40af;
+    border-radius: 9999px;
+    border: 1px solid #bfdbfe;
+    white-space: nowrap;
+}
+
+/* ── Footer ──────────────────────────────────────────────────── */
+.booking-card__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: auto;
+    padding-top: 0.35rem;
+}
+
+.booking-card__price {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #1e40af;
+}
+
+.booking-card__maps-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #6b7280;
+    background: none;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.375rem;
+    padding: 0.25rem 0.6rem;
+    cursor: pointer;
+    transition: background-color 0.15s, color 0.15s;
+    text-decoration: none;
+}
+
+.booking-card__maps-btn:hover {
+    background-color: #f3f4f6;
+    color: #111827;
+}

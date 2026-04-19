@@ -7,6 +7,7 @@ import org.example.licenta.infrastructure.repository.TimeSlotRepository;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -17,6 +18,10 @@ public class TimeSlotService {
 
     @Cacheable(value = "timeSlots")
     public List<TimeSlotResponse> getAllSlots() {
-        return timeSlotRepository.findAll().stream().map(timeSlotMapper::toResponse).toList();
+        return new ArrayList<>(
+                timeSlotRepository.findAll().stream()
+                        .map(timeSlotMapper::toResponse)
+                        .toList()
+        );
     }
 }

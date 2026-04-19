@@ -7,9 +7,9 @@ import java.util.List;
 @Data
 public class CreateParkingSpotRequest {
     private String description;
+    private String address;
     private Double pricePerHour;
     private Double pricePerDay;
     private Double latitude;
     private Double longitude;
-    private List<String> imageUrls;
 }

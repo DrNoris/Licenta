@@ -70,7 +70,8 @@ public class AuthService {
 
         String JWTToken = jwtService.generateToken(
                 user.getId().toString(),
-                user.getRole().name()
+                user.getRole().name(),
+                user.getUsername()
         );
 
         return AuthResponse.builder().token(JWTToken).build();
@@ -93,7 +94,8 @@ public class AuthService {
 
         String JWTToken = jwtService.generateToken(
                 user.getId().toString(),
-                user.getRole().name()
+                user.getRole().name(),
+                user.getUsername()
         );
 
         return AuthResponse.builder().token(JWTToken).build();

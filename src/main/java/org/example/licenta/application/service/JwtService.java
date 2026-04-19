@@ -13,10 +13,11 @@ public class JwtService {
     private final String SECRET = "very-long-secret-key-for-jwt-signing-123456789";
     private final Key key = Keys.hmacShaKeyFor(SECRET.getBytes());
 
-    public String generateToken(String userId, String role) {
+    public String generateToken(String userId, String role, String name) {
         return Jwts.builder()
                 .setSubject(userId)
                 .claim("role", role)
+                .claim("name", name)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 86400000))
                 .signWith(key)
