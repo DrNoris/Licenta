@@ -13,7 +13,7 @@ function Header() {
 
                 {/* Logo */}
                 <Link to="/" className="header__logo">
-                    <img src="../../../public/logo.png" alt="Park a Lot Logo" className="header__logo-img" />
+                    <img src="logo.png" alt="Park a Lot Logo" className="header__logo-img" />
                 </Link>
 
                 {/* Desktop Nav */}

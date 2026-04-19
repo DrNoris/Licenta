@@ -43,7 +43,7 @@ function Login() {
             <header className="login-page__header">
                 <div className="login-page__header-inner">
                     <Link to="/" className="login-page__logo">
-                        <img src="../../../public/logo.png" alt="Park a Lot Logo" className="login-page__logo-img" />
+                        <img src="logo.png" alt="Park a Lot Logo" className="login-page__logo-img" />
                     </Link>
                 </div>
             </header>
