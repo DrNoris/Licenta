@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -101,11 +102,14 @@ public class ParkingSpotController {
             @RequestParam(required = false) String date,
             @RequestParam(required = false) List<String> timeSlotIds,
             @RequestParam(required = false) Double minPricePerHour,
-            @RequestParam(required = false) Double maxPricePerHour
+            @RequestParam(required = false) Double maxPricePerHour,
+            Authentication authentication
     ) {
+        UUID currentUserId = authentication != null ? UUID.fromString(authentication.getName()) : null;
+
         return ResponseEntity.ok(
                 parkingSpotService.search(swLat, swLng, neLat, neLng,
-                        date, timeSlotIds, minPricePerHour, maxPricePerHour)
+                        date, timeSlotIds, minPricePerHour, maxPricePerHour, currentUserId)
         );
     }
 }

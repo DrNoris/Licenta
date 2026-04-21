@@ -12,6 +12,7 @@ import org.example.licenta.infrastructure.repository.ParkingSpotRepository;
 import org.example.licenta.infrastructure.repository.ParkingSpotSlotRepository;
 import org.example.licenta.infrastructure.repository.TimeSlotRepository;
 import org.example.licenta.infrastructure.repository.UserRepository;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,6 +22,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 
@@ -100,7 +102,6 @@ public class ParkingSpotService {
 
         parkingSpot.setDescription(request.getDescription());
         parkingSpot.setPricePerHour(request.getPricePerHour());
-        parkingSpot.setPricePerDay(request.getPricePerDay());
 
         if (request.getPublicIdsToDelete() != null) {
             for (String publicId : request.getPublicIdsToDelete()) {
@@ -171,7 +172,8 @@ public class ParkingSpotService {
     public List<ParkingSpotResponse> search(
             Double swLat, Double swLng, Double neLat, Double neLng,
             String date, List<String> timeSlotIds,
-            Double minPrice, Double maxPrice
+            Double minPrice, Double maxPrice,
+            UUID currentUserId
     ) {
         LocalDate parsedDate = date != null ? LocalDate.parse(date) : null;
 
@@ -190,6 +192,7 @@ public class ParkingSpotService {
                 .stream()
                 .map(spot -> {
                     ParkingSpotResponse response = parkingSpotMapper.toResponse(spot);
+
                     if (currentTimeSlotId != null && parsedSlotIds == null && parsedDate != null && parsedDate.equals(LocalDate.now())) {
                         boolean availableNow = parkingSpotSlotRepository
                                 .existsByParkingSpotIdAndTimeSlotIdAndDateAndBookingIsNull(
@@ -197,6 +200,15 @@ public class ParkingSpotService {
                                 );
                         response.setAvailableNow(availableNow);
                     }
+
+                    if (spot.getOwner().getId().equals(currentUserId)) {
+                        List<String> signedUrls = spot.getImages().stream()
+                                .map(img -> cloudinaryService.generateSignedUrl(img.getPublicId()))
+                                .toList();
+
+                        response.setImagePublicIds(signedUrls);
+                    }
+
                     return response;
                 })
                 .toList();

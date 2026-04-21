@@ -41,6 +41,7 @@ export function isAuthenticated(): boolean {
 
 export function logout(): void {
     removeToken();
+    location.reload()
 }
 //endregion
 

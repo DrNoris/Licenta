@@ -7,7 +7,6 @@ export interface EditSpotModalProps {
     onEdit: (
         description: string,
         pricePerHour: number,
-        pricePerDay: number,
         files: File[],
         publicIdsToDelete: string[]
     ) => Promise<void>;
@@ -22,7 +21,6 @@ export interface ExistingPhoto {
 export interface EditSpotFormState {
     description: string;
     pricePerHour: string;
-    pricePerDay: string;
     existingPhotos: ExistingPhoto[];
     newFiles: File[];
     photosLoading: boolean;

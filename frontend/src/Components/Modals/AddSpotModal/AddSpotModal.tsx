@@ -37,7 +37,7 @@ function AddSpotModal({ open, onClose, onAdd }: AddSpotModalProps) {
     const handleSubmit = async (e: React.FormEvent): Promise<void> => {
         e.preventDefault();
 
-        if (!form.description || !form.pricePerHour || !form.pricePerDay) {
+        if (!form.description || !form.pricePerHour) {
             setForm((prev) => ({ ...prev, error: "Completați descrierea și prețurile." }));
             return;
         }
@@ -54,7 +54,6 @@ function AddSpotModal({ open, onClose, onAdd }: AddSpotModalProps) {
                     description: form.description,
                     address: form.address,
                     pricePerHour: parseFloat(form.pricePerHour),
-                    pricePerDay: parseFloat(form.pricePerDay),
                     latitude: form.latitude,
                     longitude: form.longitude,
                 },
@@ -73,7 +72,7 @@ function AddSpotModal({ open, onClose, onAdd }: AddSpotModalProps) {
         if (e.target === e.currentTarget) onClose();
     };
 
-    const isFormValid = form.description && form.pricePerHour && form.pricePerDay
+    const isFormValid = form.description && form.pricePerHour
         && form.latitude !== null && form.longitude !== null;
 
     return createPortal(
@@ -112,84 +111,66 @@ function AddSpotModal({ open, onClose, onAdd }: AddSpotModalProps) {
                             </div>
                         </div>
 
-                        <hr className="add-spot-modal__divider" />
+                        <hr className="add-spot-modal__divider"/>
 
                         {/* Section: Prices */}
                         <div>
                             <p className="add-spot-modal__section-label">
-                                <DollarSign size={13} style={{ display: "inline", marginRight: "0.3rem" }} />
+                                <DollarSign size={13} style={{display: "inline", marginRight: "0.3rem"}}/>
                                 Prețuri
                             </p>
-                            <div className="add-spot-modal__field--row">
-                                <div className="add-spot-modal__field">
-                                    <label htmlFor="pricePerHour" className="add-spot-modal__label">
-                                        Preț / oră (lei) *
-                                    </label>
-                                    <input
-                                        id="pricePerHour"
-                                        type="number"
-                                        min="0"
-                                        step="0.01"
-                                        className="add-spot-modal__input"
-                                        value={form.pricePerHour}
-                                        onChange={handleChange}
-                                        placeholder="ex: 5.00"
-                                        disabled={form.loading}
-                                    />
-                                </div>
-                                <div className="add-spot-modal__field">
-                                    <label htmlFor="pricePerDay" className="add-spot-modal__label">
-                                        Preț / zi (lei) *
-                                    </label>
-                                    <input
-                                        id="pricePerDay"
-                                        type="number"
-                                        min="0"
-                                        step="0.01"
-                                        className="add-spot-modal__input"
-                                        value={form.pricePerDay}
-                                        onChange={handleChange}
-                                        placeholder="ex: 40.00"
-                                        disabled={form.loading}
-                                    />
-                                </div>
+                            <div className="add-spot-modal__field">
+                                <label htmlFor="pricePerHour" className="add-spot-modal__label">
+                                    Preț / oră (lei) *
+                                </label>
+                                <input
+                                    id="pricePerHour"
+                                    type="number"
+                                    min="0"
+                                    step="0.01"
+                                    className="add-spot-modal__input"
+                                    value={form.pricePerHour}
+                                    onChange={handleChange}
+                                    placeholder="ex: 5.00"
+                                    disabled={form.loading}
+                                />
                             </div>
                         </div>
 
-                        <hr className="add-spot-modal__divider" />
-
-                        {/* Section: Location */}
-                        <div>
-                            <p className="add-spot-modal__section-label">
-                                <MapPin size={13} style={{ display: "inline", marginRight: "0.3rem" }} />
-                                Locație *
-                            </p>
-                            {form.address && (
-                                <p className="add-spot-modal__hint" style={{ marginBottom: "0.5rem" }}>
-                                    📍 {form.address}
-                                </p>
-                            )}
-                            <LocationPicker
-                                value={form.latitude !== null && form.longitude !== null
-                                    ? { lat: form.latitude, lng: form.longitude }
-                                    : null
-                                }
-                                onChange={handleLocationChange}
-                                disabled={form.loading}
-                            />
-                        </div>
-
-                        <hr className="add-spot-modal__divider" />
+                        <hr className="add-spot-modal__divider"/>
 
                         {/* Section: Photos */}
                         <div>
                             <p className="add-spot-modal__section-label">
-                                <Camera size={13} style={{ display: "inline", marginRight: "0.3rem" }} />
+                                <Camera size={13} style={{display: "inline", marginRight: "0.3rem"}}/>
                                 Fotografii
                             </p>
                             <PhotoUploader
                                 files={form.files}
                                 onChange={handleFilesChange}
+                                disabled={form.loading}
+                            />
+                        </div>
+
+                        <hr className="add-spot-modal__divider"/>
+
+                        {/* Section: Location */}
+                        <div>
+                            <p className="add-spot-modal__section-label">
+                                <MapPin size={13} style={{display: "inline", marginRight: "0.3rem"}}/>
+                                Locație *
+                            </p>
+                            {form.address && (
+                                <p className="add-spot-modal__hint" style={{marginBottom: "0.5rem"}}>
+                                    📍 {form.address}
+                                </p>
+                            )}
+                            <LocationPicker
+                                value={form.latitude !== null && form.longitude !== null
+                                    ? {lat: form.latitude, lng: form.longitude}
+                                    : null
+                                }
+                                onChange={handleLocationChange}
                                 disabled={form.loading}
                             />
                         </div>

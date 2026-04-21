@@ -3,7 +3,6 @@ import type {ParkingSpot} from "../../../pages/ManageParkingSpots/ManageParkingS
 export interface AddSpotFormState {
     description: string;
     pricePerHour: string;
-    pricePerDay: string;
     latitude: number | null;
     longitude: number | null;
     address: string;
@@ -21,7 +20,6 @@ export interface AddSpotModalProps {
 export const EMPTY_FORM: AddSpotFormState = {
     description: "",
     pricePerHour: "",
-    pricePerDay: "",
     latitude: 0,
     longitude: 0,
     address: "",

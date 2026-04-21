@@ -68,13 +68,12 @@ function ManageParkingSpots() {
     const handleEdit = (spotId: string) => async (
         description: string,
         pricePerHour: number,
-        pricePerDay: number,
         newFiles: File[],
         publicIdsToDelete: string[]
     ): Promise<void> => {
         const updated = await editParkingSpotPatch(
             spotId,
-            { description, pricePerHour, pricePerDay },
+            { description, pricePerHour },
             newFiles,
             publicIdsToDelete
         );

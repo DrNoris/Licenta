@@ -11,7 +11,6 @@ function EditSpotModal({ isOpen, spot, onClose, onEdit }: EditSpotModalProps) {
     const [form, setForm] = useState<EditSpotFormState>({
         description: spot.description,
         pricePerHour: spot.pricePerHour.toString(),
-        pricePerDay: spot.pricePerDay.toString(),
         existingPhotos: [],
         newFiles: [],
         photosLoading: false,
@@ -29,7 +28,6 @@ function EditSpotModal({ isOpen, spot, onClose, onEdit }: EditSpotModalProps) {
         setForm({
             description: spot.description,
             pricePerHour: spot.pricePerHour.toString(),
-            pricePerDay: spot.pricePerDay.toString(),
             existingPhotos: [],
             newFiles: [],
             photosLoading: spot.imagePublicIds.length > 0,
@@ -77,7 +75,7 @@ function EditSpotModal({ isOpen, spot, onClose, onEdit }: EditSpotModalProps) {
     const handleSubmit = async (e: React.FormEvent): Promise<void> => {
         e.preventDefault();
 
-        if (!form.description || !form.pricePerHour || !form.pricePerDay) {
+        if (!form.description || !form.pricePerHour) {
             setForm((prev) => ({ ...prev, error: "Completați toate câmpurile obligatorii." }));
             return;
         }
@@ -92,7 +90,6 @@ function EditSpotModal({ isOpen, spot, onClose, onEdit }: EditSpotModalProps) {
             await onEdit(
                 form.description,
                 parseFloat(form.pricePerHour),
-                parseFloat(form.pricePerDay),
                 form.newFiles,
                 publicIdsToDelete
             );
@@ -107,7 +104,7 @@ function EditSpotModal({ isOpen, spot, onClose, onEdit }: EditSpotModalProps) {
         if (e.target === e.currentTarget) onClose();
     };
 
-    const isFormValid = form.description && form.pricePerHour && form.pricePerDay;
+    const isFormValid = form.description && form.pricePerHour;
     const remainingSlots = 5 - (form.existingPhotos.filter((p) => !p.markedForDeletion).length);
 
     return createPortal(
@@ -154,7 +151,6 @@ function EditSpotModal({ isOpen, spot, onClose, onEdit }: EditSpotModalProps) {
                                 <DollarSign size={13} style={{ display: "inline", marginRight: "0.3rem" }} />
                                 Prețuri
                             </p>
-                            <div className="edit-spot-modal__field--row">
                                 <div className="edit-spot-modal__field">
                                     <label htmlFor="pricePerHour" className="edit-spot-modal__label">
                                         Preț / oră (lei) *
@@ -171,23 +167,6 @@ function EditSpotModal({ isOpen, spot, onClose, onEdit }: EditSpotModalProps) {
                                         disabled={form.loading}
                                     />
                                 </div>
-                                <div className="edit-spot-modal__field">
-                                    <label htmlFor="pricePerDay" className="edit-spot-modal__label">
-                                        Preț / zi (lei) *
-                                    </label>
-                                    <input
-                                        id="pricePerDay"
-                                        type="number"
-                                        min="0"
-                                        step="0.01"
-                                        className="edit-spot-modal__input"
-                                        value={form.pricePerDay}
-                                        onChange={handleChange}
-                                        placeholder="ex: 40.00"
-                                        disabled={form.loading}
-                                    />
-                                </div>
-                            </div>
                         </div>
 
                         <hr className="edit-spot-modal__divider" />

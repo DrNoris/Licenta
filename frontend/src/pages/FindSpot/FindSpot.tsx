@@ -1,4 +1,5 @@
 import {useEffect, useRef, useState} from "react";
+import { useSearchParams } from "react-router-dom";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import {Search, Calendar, Clock, SlidersHorizontal, X, ParkingSquare, ArrowLeft} from "lucide-react";
@@ -17,6 +18,7 @@ import {Link} from "react-router-dom";
 import {DEFAULT_MAP_SETTINGS} from "../../Components/LocationPicker/LocationPicker.types.ts";
 import {getSlots} from "../../services/parkingSpotSlotService.ts";
 import {createCheckoutSession} from "../../services/bookingService.ts";
+import AuthGuard from "../../Components/AuthGuard/AuthGuard.tsx";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error
 delete L.Icon.Default.prototype._getIconUrl;
@@ -30,13 +32,28 @@ function FindSpot() {
 
     const [spots, setSpots] = useState<ParkingSpot[]>([]);
     const [selectedSpot, setSelectedSpot] = useState<ParkingSpot | null>(null);
-    const [filters, setFilters] = useState<FindSpotFilters>(EMPTY_FILTERS);
+    const [searchParams, setSearchParams] = useSearchParams();
+    const [filters, setFilters] = useState<FindSpotFilters>(() => ({
+        date: searchParams.get("date") ?? "",
+        timeSlotIds: searchParams.getAll("timeSlotIds"),
+        minPricePerHour: searchParams.get("minPricePerHour") ?? "",
+        maxPricePerHour: searchParams.get("maxPricePerHour") ?? "",
+    }));
     const [allTimeSlots, setAllTimeSlots] = useState<TimeSlot[]>([]);
     const [showSlotPanel, setShowSlotPanel] = useState(false);
     const [searching, setSearching] = useState(false);
     const [mapMoved, setMapMoved] = useState(false);
     const [hasSearched, setHasSearched] = useState(false);
     const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
+    const [mapReady, setMapReady] = useState(false);
+
+    const initialBoundsRef = useRef({
+        swLat: searchParams.get("swLat"),
+        swLng: searchParams.get("swLng"),
+        neLat: searchParams.get("neLat"),
+        neLng: searchParams.get("neLng"),
+    });
+    const hasBoundsInUrl = Object.values(initialBoundsRef.current).every(Boolean);
 
     const filtersRef = useRef<FindSpotFilters>(EMPTY_FILTERS);
     filtersRef.current = filters;
@@ -79,6 +96,7 @@ function FindSpot() {
         });
 
         mapRef.current = map;
+        setMapReady(true);
 
         return () => {
             map.remove();
@@ -122,6 +140,27 @@ function FindSpot() {
         });
     }, [spots, selectedSpot]);
 
+    useEffect(() => {
+        if (!mapReady || !hasBoundsInUrl || !filtersRef.current.date) return;
+
+        const boundingBox: BoundingBox = {
+            swLat: Number(initialBoundsRef.current.swLat),
+            swLng: Number(initialBoundsRef.current.swLng),
+            neLat: Number(initialBoundsRef.current.neLat),
+            neLng: Number(initialBoundsRef.current.neLng),
+        };
+
+        setSearching(true);
+        searchParkingSpots({ boundingBox, filters: filtersRef.current })
+            .then((results) => {
+                setSpots(results);
+                setHasSearched(true);
+            })
+            .catch(() => {})
+            .finally(() => setSearching(false));
+
+    }, [mapReady]);
+
     const triggerSearch = async (map?: L.Map) => {
         const m = map ?? mapRef.current;
         if (!m || !filtersRef.current.date) return;
@@ -134,6 +173,21 @@ function FindSpot() {
             neLng: bounds.getNorthEast().lng,
         };
 
+        const params: Record<string, string | string[]> = {
+            swLat: String(boundingBox.swLat),
+            swLng: String(boundingBox.swLng),
+            neLat: String(boundingBox.neLat),
+            neLng: String(boundingBox.neLng),
+            date: filtersRef.current.date,
+        };
+        if (filtersRef.current.timeSlotIds.length > 0)
+            params.timeSlotIds = filtersRef.current.timeSlotIds;
+        if (filtersRef.current.minPricePerHour)
+            params.minPricePerHour = filtersRef.current.minPricePerHour;
+        if (filtersRef.current.maxPricePerHour)
+            params.maxPricePerHour = filtersRef.current.maxPricePerHour;
+
+        setSearchParams(params as any, { replace: true });
         setSearching(true);
         setMapMoved(false);
         setSelectedSpot(null);
@@ -161,6 +215,7 @@ function FindSpot() {
 
     const clearFilters = () => {
         setFilters(EMPTY_FILTERS);
+        setSearchParams({}, { replace: true });
         setShowSlotPanel(false);
         setSpots([]);
         setHasSearched(false);
@@ -271,16 +326,23 @@ function FindSpot() {
             {showSlotPanel && (
                 <div className="find-spot__slot-panel">
                     <p className="find-spot__slot-panel-title">Selectează intervalele</p>
-                    {allTimeSlots.map((slot) => (
-                        <div
-                            key={slot.id}
-                            className={`find-spot__slot-chip ${filters.timeSlotIds.includes(slot.id) ? "find-spot__slot-chip--selected" : ""}`}
-                            onClick={() => toggleSlot(slot.id)}
-                        >
-                        <span>{formatHour(slot.startHour)} → {formatHour(slot.endHour)}</span>
-                            {filters.timeSlotIds.includes(slot.id) && <X size={12}/>}
-                        </div>
-                    ))}
+                    {allTimeSlots.map((slot) =>
+                        {
+                            const now: number = new Date().getHours();
+
+                            if (slot.startHour < now)
+                                return;
+
+                            return <div
+                                key={slot.id}
+                                className={`find-spot__slot-chip ${filters.timeSlotIds.includes(slot.id) ? "find-spot__slot-chip--selected" : ""}`}
+                                onClick={() => toggleSlot(slot.id)}
+                            >
+                                <span>{formatHour(slot.startHour)} → {formatHour(slot.endHour)}</span>
+                                {filters.timeSlotIds.includes(slot.id) && <X size={12}/>}
+                            </div>
+                        }
+                    )}
                 </div>
             )}
 
@@ -317,12 +379,12 @@ function FindSpot() {
 
             {/* ── Spot popup ───────────────────────────────────────── */}
             {selectedSpot && (
-                <SpotPopup
+                <AuthGuard children={<SpotPopup
                     spot={selectedSpot}
                     date={filters.date}
                     availableSlots={availableSlots}
                     onBook={handleBook}
-                />
+                />}/>
             )}
         </div>
     );
