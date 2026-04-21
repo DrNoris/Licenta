@@ -12,7 +12,6 @@ import org.example.licenta.infrastructure.repository.ParkingSpotRepository;
 import org.example.licenta.infrastructure.repository.ParkingSpotSlotRepository;
 import org.example.licenta.infrastructure.repository.TimeSlotRepository;
 import org.example.licenta.infrastructure.repository.UserRepository;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,7 +21,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 
@@ -78,13 +76,13 @@ public class ParkingSpotService {
 
         if (images != null) {
             for (MultipartFile file : images) {
-                String publicId = cloudinaryService.uploadPrivate(
-                        file, "parking-spots/" + spot.getId()
-                );
+                String publicId = cloudinaryService.uploadPrivate(file, "parking-spots/" + spot.getId());
+
                 ParkingSpotImage image = ParkingSpotImage.builder()
                         .publicId(publicId)
                         .parkingSpot(spot)
                         .build();
+
                 spot.getImages().add(image);
             }
             spot = parkingSpotRepository.save(spot);

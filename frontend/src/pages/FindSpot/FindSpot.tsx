@@ -46,6 +46,7 @@ function FindSpot() {
     const [hasSearched, setHasSearched] = useState(false);
     const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
     const [mapReady, setMapReady] = useState(false);
+    const [filtersChanged, setFiltersChanged] = useState(false);
 
     const initialBoundsRef = useRef({
         swLat: searchParams.get("swLat"),
@@ -162,6 +163,7 @@ function FindSpot() {
     }, [mapReady]);
 
     const triggerSearch = async (map?: L.Map) => {
+        setFiltersChanged(false);
         const m = map ?? mapRef.current;
         if (!m || !filtersRef.current.date) return;
 
@@ -215,6 +217,7 @@ function FindSpot() {
 
     const clearFilters = () => {
         setFilters(EMPTY_FILTERS);
+        setFiltersChanged(false);
         setSearchParams({}, { replace: true });
         setShowSlotPanel(false);
         setSpots([]);
@@ -261,7 +264,10 @@ function FindSpot() {
                         className="find-spot__date-input"
                         value={filters.date}
                         min={today}
-                        onChange={(e) => setFilters((prev) => ({...prev, date: e.target.value}))}
+                        onChange={(e) => {
+                            setFilters((prev) => ({...prev, date: e.target.value}));
+                            setFiltersChanged(true);
+                        }}
                     />
                 </div>
 
@@ -358,7 +364,7 @@ function FindSpot() {
             )}
 
             {/* ── No results after search ───────────────────────────── */}
-            {hasSearched && spots.length === 0 && !searching && (
+            {hasSearched && spots.length === 0 && !searching && !mapMoved && !filtersChanged && (
                 <div className="find-spot__hint find-spot__hint--no-results">
                     <ParkingSquare size={32} strokeWidth={1.5}/>
                     <p>Niciun loc disponibil în această zonă pentru filtrele selectate</p>
@@ -366,7 +372,7 @@ function FindSpot() {
             )}
 
             {/* ── Search in area button ────────────────────────────── */}
-            {mapMoved && filters.date && (
+            {(mapMoved || filtersChanged) && filters.date && (
                 <button
                     className="find-spot__search-btn"
                     onClick={() => triggerSearch()}

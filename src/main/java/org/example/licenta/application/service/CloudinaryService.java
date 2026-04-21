@@ -66,5 +66,4 @@ public class CloudinaryService {
             throw new RuntimeException("Could not generate signed URL for: " + publicId, e);
         }
     }
-
 }
