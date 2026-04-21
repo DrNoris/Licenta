@@ -16,9 +16,9 @@
     border-radius: 0.75rem;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
     width: 100%;
-    max-width: 26rem;
+    max-width: 38rem;
     height: 90vh;
-    max-height: 640px;    /* fixed height — never grows with content */
+    max-height: 760px;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -339,6 +339,30 @@
     color: #854d0e;
 }
 
+.slot-item__right {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.slot-item__chat-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.2rem 0.5rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    background-color: #eff6ff;
+    color: #1e40af;
+    border: 1px solid #bfdbfe;
+    border-radius: 9999px;
+    cursor: pointer;
+    transition: background-color 0.15s;
+}
+
+.slot-item__chat-btn:hover {
+    background-color: #dbeafe;
+}
 
 /* ── Recurrence wrap ─────────────────────────────────────────── */
 .rent-modal__recurrence-wrap {
@@ -449,3 +473,4 @@
     padding: 0.4rem 0.6rem;
     margin-top: 0.25rem;
 }
+

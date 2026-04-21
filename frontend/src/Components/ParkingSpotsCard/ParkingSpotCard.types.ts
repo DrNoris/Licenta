@@ -5,7 +5,7 @@ export interface ParkingSpotCardProps {
     spot: ParkingSpot;
     onDelete?: (id: string) => void;
     onUpdateTimeSlots?: (parkingSpotId: string, selectedDates: string[], slotsToAdd: TimeSlot[], slotsToDelete: TimeSlot[]) => Promise<void>;
-    onEdit?: (description: string, pricePerHour: number, pricePerDay: number, newFiles: File[], publicIdsToDelete: string[]) => Promise<void>;
+    onEdit?: (description: string, pricePerHour: number, newFiles: File[], publicIdsToDelete: string[]) => Promise<void>;
     isOwner?: boolean;
 }
 

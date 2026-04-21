@@ -30,9 +30,6 @@ public class ParkingSpot {
     private Double pricePerHour;
 
     @Column(nullable = false)
-    private Double pricePerDay;
-
-    @Column(nullable = false)
     private Double latitude;
 
     @Column(nullable = false)

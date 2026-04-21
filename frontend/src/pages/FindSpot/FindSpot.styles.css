@@ -31,6 +31,8 @@
     gap: 0.5rem;
     flex-wrap: nowrap;
     max-width: calc(100vw - 2rem);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .find-spot__filter-divider {
@@ -452,6 +454,14 @@
     border-radius: 9999px;
     border: 1px solid #bfdbfe;
     white-space: nowrap;
+}
+
+.spot-popup__thumbnail {
+    width: 100%;
+    height: 10rem;
+    object-fit: cover;
+    border-radius: 0.5rem 0.5rem 0 0;
+    display: block;
 }
 
 /* ── Slot chips — horizontal scrollable ──────────────────────── */

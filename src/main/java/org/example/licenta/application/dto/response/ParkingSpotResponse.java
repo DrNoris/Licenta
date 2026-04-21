@@ -10,7 +10,6 @@ public class ParkingSpotResponse {
     private String address;
     private String description;
     private Double pricePerHour;
-    private Double pricePerDay;
     private Double latitude;
     private Double longitude;
     private List<String> imagePublicIds;

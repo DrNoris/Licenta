@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -33,7 +34,13 @@ public class ParkingSpotSlotService {
     public AvailabilityResponse getAvailability(UUID spotId, LocalDate date) {
         List<ParkingSpotSlot> freeSlots = parkingSpotSlotRepository.findByParkingSpotIdAndDateAndBookingIsNull(spotId, date);
 
-        return availabilityMapper.toAvailabilityResponse(freeSlots, date);
+        if (!LocalDate.now().isEqual(date))
+            return availabilityMapper.toAvailabilityResponse(freeSlots, date);
+
+        LocalTime now = LocalTime.now();
+        List<ParkingSpotSlot> filteredSlots = freeSlots.stream().filter(parkingSpotSlot -> parkingSpotSlot.getTimeSlot().getEndHour() > now.getHour()).toList();
+
+        return availabilityMapper.toAvailabilityResponse(filteredSlots, date);
     }
 
     public List<ParkingSpotSlotResponse> getAllSlotsForDate(UUID ownerId, UUID spotId, LocalDate date) throws AccessDeniedException {

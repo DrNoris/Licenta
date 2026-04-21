@@ -16,10 +16,11 @@ function authHeaders(): HeadersInit {
     };
 }
 
-export function jsonAuthHeaders(): HeadersInit {
+export function jsonAuthHeaders(): Record<string, string> {
+    const token = getToken();
     return {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${getToken()}`,
+        ...(token && { Authorization: `Bearer ${token}` }),
     };
 }
 
@@ -60,7 +61,7 @@ export async function addParkingSpot(
 // ── Edit a parking spot (PATCH) ───────────────────────────────
 export async function editParkingSpotPatch(
     spotId: string,
-    data: { description: string; pricePerHour: number; pricePerDay: number },
+    data: { description: string; pricePerHour: number; },
     newFiles: File[],
     publicIdsToDelete: string[]
 ): Promise<ParkingSpot> {

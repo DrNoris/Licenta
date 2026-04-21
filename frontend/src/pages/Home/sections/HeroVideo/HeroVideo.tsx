@@ -5,7 +5,7 @@ export default function HeroVideo({
                        title = "Bine ați venit la Park a Lot",
                        subtitle = "Cel mai tare din parcare - Prima aplicație de park sharing peer to peer",
                        ctaLabel = "Hai să pornim!",
-                       ctaHref = "#",
+                       ctaHref = "/find_spot",
                    }: HeroVideoProps) {
     return (
         <div className="hero">

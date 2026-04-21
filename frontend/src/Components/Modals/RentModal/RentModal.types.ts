@@ -1,5 +1,6 @@
 export const SlotAvailabilityType = {
     AVAILABLE: "AVAILABLE",
+    UNAVAILABLE: "UNAVAILABLE",
     OFFERED: "OFFERED",
     BOOKED: "BOOKED",
 } as const;
@@ -12,13 +13,12 @@ export interface TimeSlot {
     endHour: number;
 }
 
-// Slot belonging to a specific parking spot on a specific date
 export interface ParkingSpotSlot {
     id: string;
-    timeSlotId: string;      // references TimeSlot.id
+    timeSlotId: string;
     date: string;
     parkingSpotId: string;
-    bookingId: string | null; // null = offered but not booked
+    bookingId: string | null;
 }
 
 export interface SlotItemProps {
@@ -26,6 +26,7 @@ export interface SlotItemProps {
     slotAvailabilityType: SlotAvailabilityType | undefined;
     isSelected: boolean;
     onToggle: (slot: TimeSlot) => void;
+    spotId: string;
 }
 
 export interface RentModalProps {

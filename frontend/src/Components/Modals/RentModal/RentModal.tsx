@@ -55,7 +55,7 @@ function generateDates(startDate: string, recurrence: RecurrenceType, stopDate: 
 function RentModal({ isOpen, onClose, spotId, spotDescription, onUpdateTimeSlots }: RentModalProps) {
     useBodyScrollLock(isOpen);
 
-    const today = formatDate(new Date());
+    const [today, setToday] = useState<string>(formatDate(new Date()));
     const [selectedDate, setSelectedDate] = useState<string>(today);
     const [allSlots, setAllSlots] = useState<TimeSlot[]>([]);
     const [slotsForSpot, setSlotsForSpot] = useState<ParkingSpotSlot[]>([]);
@@ -91,9 +91,12 @@ function RentModal({ isOpen, onClose, spotId, spotDescription, onUpdateTimeSlots
         return () => document.removeEventListener("mousedown", handleClick);
     }, []);
 
-    // ── Load all time slots once ──────────────────────────────
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setToday(formatDate(new Date()));
+
         if (!isOpen || allSlotsLoadedRef.current) return;
+
         getAllTimeSlots()
             .then((slots) => { setAllSlots(slots); allSlotsLoadedRef.current = true; })
             .catch((err: unknown) => setError(err instanceof Error ? err.message : "Eroare la încărcarea intervalelor."));
@@ -135,9 +138,21 @@ function RentModal({ isOpen, onClose, spotId, spotDescription, onUpdateTimeSlots
     }, [isOpen]);
 
     const getSlotType = (slot: TimeSlot): SlotAvailabilityType => {
+        const nowHour: number = new Date().getHours();
+        const nowDate: string = formatDate(new Date());
+        const past: boolean = slot.startHour < nowHour && selectedDate == nowDate;
+
         const spotSlot = slotsForSpot.find((s) => s.timeSlotId === slot.id);
-        if (!spotSlot) return SlotAvailabilityType.AVAILABLE;
-        if (spotSlot.bookingId) return SlotAvailabilityType.BOOKED;
+        if (!spotSlot) {
+            if (past)
+                return  SlotAvailabilityType.UNAVAILABLE;
+
+            return SlotAvailabilityType.AVAILABLE;
+        }
+
+        if (spotSlot.bookingId)
+            return SlotAvailabilityType.BOOKED;
+
         return SlotAvailabilityType.OFFERED;
     };
 
@@ -304,15 +319,18 @@ function RentModal({ isOpen, onClose, spotId, spotDescription, onUpdateTimeSlots
 
                         {!availabilityLoading && !error && allSlots.length > 0 && (
                             <div className="rent-modal__slots-wrap">
-                                {allSlots.map((slot) => (
-                                    <SlotItem
+                                {allSlots.map((slot) => {
+
+
+                                    return <SlotItem
                                         key={slot.id}
                                         slot={slot}
                                         slotAvailabilityType={getSlotType(slot)}
                                         isSelected={isSelected(slot)}
                                         onToggle={handleToggle}
+                                        spotId={spotId}
                                     />
-                                ))}
+                                })}
                             </div>
                         )}
                     </div>

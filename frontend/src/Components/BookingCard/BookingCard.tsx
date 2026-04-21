@@ -14,6 +14,9 @@ function BookingCard({ booking, onClick, isArchive }: BookingCardProps) {
 
     // Fetch first signed image for preview
     useEffect(() => {
+        if (isArchive)
+            return;
+
         getSignedImageUrls(booking.parkingSpot.id)
             .then((urls) => {
                 if (urls.length > 0) setPreviewUrl(urls[0]);
@@ -21,7 +24,8 @@ function BookingCard({ booking, onClick, isArchive }: BookingCardProps) {
             .catch(() => {});
     }, [booking.parkingSpot.id]);
 
-    const handleChat = async () => {
+    const handleChat = async (e: React.MouseEvent) => {
+        e.stopPropagation();
         const conv = await getOrCreateConversation(booking.parkingSpot.id);
         navigate(`/chat/${conv.id}`);
     };
@@ -62,7 +66,7 @@ function BookingCard({ booking, onClick, isArchive }: BookingCardProps) {
                     </span>
                     {!isArchive && (
                         <>
-                            <button className="booking-card__chat-btn" onClick={handleChat}>
+                            <button className="booking-card__maps-btn" onClick={handleChat}>
                                 <MessageSquare size={12}/>
                                 Chat
                             </button>

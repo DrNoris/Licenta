@@ -3,7 +3,6 @@ export interface ParkingSpot {
     description: string;
     address: string;
     pricePerHour: number;
-    pricePerDay: number;
     latitude: number;
     longitude: number;
     imagePublicIds: string[];

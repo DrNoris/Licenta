@@ -20,40 +20,36 @@ function Header() {
                 <nav className="header__nav-desktop">
                     {isAuthenticated() ? (
                         <>
-                            {/*<img*/}
-                            {/*    className="header__icon"*/}
-                            {/*    src="https://cdn-icons-png.flaticon.com/512/3119/3119338.png"*/}
-                            {/*    alt="Notifications"*/}
-                            {/*/>*/}
-                            {/*<img*/}
-                            {/*    className="header__icon"*/}
-                            {/*    src="https://icons.veryicon.com/png/o/miscellaneous/basic-icon/message-54.png"*/}
-                            {/*    alt="Messages"*/}
-                            {/*/>*/}
                             <Link to="/bookings">
                                 <button className="btn-primary">REZERVĂRI</button>
                             </Link>
+
                             <Link to="/chat">
                                 <button className="btn-primary">CHAT</button>
                             </Link>
+
                             <Link to="/find_spot">
                                 <button className="btn-primary">HARTĂ</button>
                             </Link>
+
                             <Link to="/manage">
                                 <button className="btn-outline">ÎNCHIREAZĂ</button>
                             </Link>
-                                <img
-                                    className="header__avatar"
-                                    src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
-                                    alt="User profile"
-                                    onClick={() => logout()}
-                                />
+
+                            <button className="btn-outline" onClick={() => logout()}>
+                                SIGN OUT
+                            </button>
                         </>
                     ) : (
                         <>
-                        <Link to="/login">
+                            <Link to="/find_spot">
+                                <button className="btn-primary">HARTĂ</button>
+                            </Link>
+
+                            <Link to="/login">
                                 <button className="btn-primary">LOG IN</button>
                             </Link>
+
                             <Link to="/register">
                                 <button className="btn-outline">SIGN UP</button>
                             </Link>
@@ -72,35 +68,39 @@ function Header() {
                 <nav className="header__nav-mobile">
                     {isAuthenticated() ? (
                         <>
-
                             <Link to="/bookings" onClick={() => setIsOpen(false)}>
                                 <button className="btn-primary btn-primary--wide">REZERVĂRI</button>
                             </Link>
+
                             <Link to="/chat">
-                                <button className="btn-primary">CHAT</button>
+                                <button className="btn-primary btn-primary--wide">CHAT</button>
                             </Link>
-                            {/*<button className="btn-primary btn-primary--wide">MESAJE</button>*/}
-                            {/*<button className="btn-primary btn-primary--wide">CONT</button>*/}
 
                             <Link to="/find_spot" onClick={() => setIsOpen(false)}>
                                 <button className="btn-primary btn-primary--wide">HARTĂ</button>
                             </Link>
+
                             <Link to="/manage" onClick={() => setIsOpen(false)}>
                                 <button className="btn-outline btn-outline--wide">ÎNCHIREAZĂ</button>
                             </Link>
 
                             <hr className="header__divider"/>
 
-                                <button className="btn-outline btn-outline--wide" onClick={() => {
-                                    setIsOpen(false);
-                                    logout();
-                                }}>SIGN OUT</button>
+                            <button className="btn-outline btn-outline--wide" onClick={() => {
+                                setIsOpen(false);
+                                logout();
+                            }}>SIGN OUT</button>
                         </>
                     ) : (
                         <>
-                        <Link to="/login" onClick={() => setIsOpen(false)}>
+                            <Link to="/find_spot">
+                                <button className="btn-primary btn-primary--wide">HARTĂ</button>
+                            </Link>
+
+                            <Link to="/login" onClick={() => setIsOpen(false)}>
                                 <button className="btn-primary btn-primary--wide">LOG IN</button>
                             </Link>
+
                             <Link to="/register" onClick={() => setIsOpen(false)}>
                                 <button className="btn-outline btn-outline--wide">SIGN UP</button>
                             </Link>

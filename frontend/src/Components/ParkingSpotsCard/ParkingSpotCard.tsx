@@ -156,18 +156,11 @@ function ParkingSpotCard({ spot, onDelete, onUpdateTimeSlots, onEdit, isOwner = 
             <div className="spot-card__body">
                 <p className="spot-card__description">{spot.description}</p>
                 <span className="spot-card__location">
-          <MapPin size={13} />
-                    {spot.address}
-        </span>
-                <div className="spot-card__prices">
-                    <div className="spot-card__price">
-                        <span className="spot-card__price-label">/ oră</span>
-                        <span className="spot-card__price-value">{spot.pricePerHour.toFixed(2)} lei</span>
-                    </div>
-                    <div className="spot-card__price">
-                        <span className="spot-card__price-label">/ zi</span>
-                        <span className="spot-card__price-value">{spot.pricePerDay.toFixed(2)} lei</span>
-                    </div>
+                  <MapPin size={13} />
+                            {spot.address}
+                </span>
+                <div className="spot-card__price">
+                    <span className="spot-card__price-value">{spot.pricePerHour.toFixed(2)} lei</span>
                 </div>
             </div>
 

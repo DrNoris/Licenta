@@ -1,6 +1,7 @@
 package org.example.licenta.infrastructure.repository;
 
 import org.example.licenta.domain.model.ParkingSpotSlot;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,6 +15,7 @@ public interface ParkingSpotSlotRepository extends JpaRepository<ParkingSpotSlot
 
     boolean existsByParkingSpotIdAndTimeSlotIdAndDate(UUID spotId, UUID timeSlotId, LocalDate date);
 
+    @EntityGraph(attributePaths = {"timeSlot"})
     List<ParkingSpotSlot> findByParkingSpotIdAndDateAndBookingIsNull(UUID spotId, LocalDate date);
 
     List<ParkingSpotSlot> findByParkingSpotIdAndDate(UUID spotId, LocalDate date);

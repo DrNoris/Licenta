@@ -8,6 +8,5 @@ import java.util.List;
 public class UpdateParkingSpotRequest {
     private String description;
     private Double pricePerHour;
-    private Double pricePerDay;
     private List<String> publicIdsToDelete;
 }

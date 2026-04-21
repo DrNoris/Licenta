@@ -35,16 +35,18 @@ function SpotPopup({ spot, date, availableSlots, onBook }: SpotPopupProps) {
                 </div>
 
                 {/* Prices */}
-                <div className="spot-popup__prices">
                     <div className="spot-popup__price">
                         <span className="spot-popup__price-label">/ oră</span>
                         <span className="spot-popup__price-value">{spot.pricePerHour.toFixed(2)} lei</span>
                     </div>
-                    <div className="spot-popup__price">
-                        <span className="spot-popup__price-label">/ zi</span>
-                        <span className="spot-popup__price-value">{spot.pricePerDay.toFixed(2)} lei</span>
-                    </div>
-                </div>
+
+                {spot.imagePublicIds?.length > 0 && (
+                    <img
+                        src={spot.imagePublicIds[0]}
+                        className="spot-popup__thumbnail"
+                        alt="Loc de parcare"
+                    />
+                )}
 
                 {/* Available slots — horizontal scrollable, selectable */}
                 <div className="spot-popup__slots">
@@ -71,13 +73,15 @@ function SpotPopup({ spot, date, availableSlots, onBook }: SpotPopupProps) {
                 </div>
 
                 {/* Book button */}
-                <button
-                    className="spot-popup__btn-book"
-                    onClick={() => onBook(spot, selectedSlots)}
-                    disabled={selectedSlots.length === 0}
-                >
-                    Rezervă {selectedSlots.length > 0 ? `(${selectedSlots.length})` : ""}
-                </button>
+                {!spot.imagePublicIds && (
+                    <button
+                        className="spot-popup__btn-book"
+                        onClick={() => onBook(spot, selectedSlots)}
+                        disabled={selectedSlots.length === 0}
+                    >
+                        Rezervă {selectedSlots.length > 0 ? `(${selectedSlots.length})` : ""}
+                    </button>
+                )}
             </div>
         </div>
     );

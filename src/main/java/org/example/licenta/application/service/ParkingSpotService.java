@@ -76,13 +76,13 @@ public class ParkingSpotService {
 
         if (images != null) {
             for (MultipartFile file : images) {
-                String publicId = cloudinaryService.uploadPrivate(
-                        file, "parking-spots/" + spot.getId()
-                );
+                String publicId = cloudinaryService.uploadPrivate(file, "parking-spots/" + spot.getId());
+
                 ParkingSpotImage image = ParkingSpotImage.builder()
                         .publicId(publicId)
                         .parkingSpot(spot)
                         .build();
+
                 spot.getImages().add(image);
             }
             spot = parkingSpotRepository.save(spot);
@@ -100,7 +100,6 @@ public class ParkingSpotService {
 
         parkingSpot.setDescription(request.getDescription());
         parkingSpot.setPricePerHour(request.getPricePerHour());
-        parkingSpot.setPricePerDay(request.getPricePerDay());
 
         if (request.getPublicIdsToDelete() != null) {
             for (String publicId : request.getPublicIdsToDelete()) {
@@ -171,7 +170,8 @@ public class ParkingSpotService {
     public List<ParkingSpotResponse> search(
             Double swLat, Double swLng, Double neLat, Double neLng,
             String date, List<String> timeSlotIds,
-            Double minPrice, Double maxPrice
+            Double minPrice, Double maxPrice,
+            UUID currentUserId
     ) {
         LocalDate parsedDate = date != null ? LocalDate.parse(date) : null;
 
@@ -190,6 +190,7 @@ public class ParkingSpotService {
                 .stream()
                 .map(spot -> {
                     ParkingSpotResponse response = parkingSpotMapper.toResponse(spot);
+
                     if (currentTimeSlotId != null && parsedSlotIds == null && parsedDate != null && parsedDate.equals(LocalDate.now())) {
                         boolean availableNow = parkingSpotSlotRepository
                                 .existsByParkingSpotIdAndTimeSlotIdAndDateAndBookingIsNull(
@@ -197,6 +198,15 @@ public class ParkingSpotService {
                                 );
                         response.setAvailableNow(availableNow);
                     }
+
+                    if (spot.getOwner().getId().equals(currentUserId)) {
+                        List<String> signedUrls = spot.getImages().stream()
+                                .map(img -> cloudinaryService.generateSignedUrl(img.getPublicId()))
+                                .toList();
+
+                        response.setImagePublicIds(signedUrls);
+                    }
+
                     return response;
                 })
                 .toList();
