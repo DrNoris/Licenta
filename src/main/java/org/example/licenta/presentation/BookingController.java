@@ -91,4 +91,10 @@ public class BookingController {
 
         return ResponseEntity.ok(valid);
     }
+
+    @GetMapping("/api/bookings/buyer")
+    public ResponseEntity<UUID> getBuyerForSpot(@RequestParam UUID spotId) {
+        UUID buyerId = bookingService.getActiveBuyerForSpot(spotId);
+        return ResponseEntity.ok(buyerId);
+    }
 }

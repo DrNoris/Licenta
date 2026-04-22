@@ -40,11 +40,11 @@ public class ChatController {
             Authentication authentication,
             HttpServletRequest request
     ) {
-        UUID buyerId = UUID.fromString(authentication.getName());
+        UUID requesterId = UUID.fromString(authentication.getName());
         String token = request.getHeader("Authorization").substring(7);
-        String buyerName = jwtService.extractUserName(token);
+        String requesterName = jwtService.extractUserName(token);
 
-        return ResponseEntity.ok(chatService.getOrCreateConversation(req, buyerId, buyerName));
+        return ResponseEntity.ok(chatService.getOrCreateConversation(req, requesterId, requesterName));
     }
 
     @GetMapping("/conversations/{id}/messages")

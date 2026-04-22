@@ -48,7 +48,7 @@ export async function reverseGeocode(latlng: LatLng) {
     }
 }
 
-function LocationPicker({ value, onChange, disabled = false }: LocationPickerProps) {
+function LocationPicker({ value, onChange, disabled = false, initialCenter }: LocationPickerProps) {
     const mapContainerRef: React.RefObject<HTMLDivElement | null> = useRef<HTMLDivElement>(null);
     const mapRef: React.RefObject<L.Map | null> = useRef<L.Map | null>(null);
     const markerRef: React.RefObject<L.Marker | null> = useRef<L.Marker | null>(null);
@@ -62,7 +62,14 @@ function LocationPicker({ value, onChange, disabled = false }: LocationPickerPro
     useEffect(() => {
         if (!mapContainerRef.current || mapRef.current) return;
 
-        const map = L.map(mapContainerRef.current, DEFAULT_MAP_SETTINGS);
+        const center = initialCenter
+            ? [initialCenter.lat, initialCenter.lng] as [number, number]
+            : DEFAULT_MAP_SETTINGS.center;
+
+        const map = L.map(mapContainerRef.current, {
+            ...DEFAULT_MAP_SETTINGS,
+            center,
+        });
 
         L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
             attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',

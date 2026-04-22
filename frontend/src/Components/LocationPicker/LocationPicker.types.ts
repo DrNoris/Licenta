@@ -4,6 +4,7 @@ export interface LocationPickerProps {
     value: LatLng | null;
     onChange: (latlng: LatLng, address: string) => void;
     disabled?: boolean;
+    initialCenter?: LatLng;
 }
 
 export interface NominatimResult {

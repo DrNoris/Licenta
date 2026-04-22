@@ -19,10 +19,14 @@ import {DEFAULT_MAP_SETTINGS} from "../../Components/LocationPicker/LocationPick
 import {getSlots} from "../../services/parkingSpotSlotService.ts";
 import {createCheckoutSession} from "../../services/bookingService.ts";
 import AuthGuard from "../../Components/AuthGuard/AuthGuard.tsx";
+
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({iconRetinaUrl: markerIcon2x, iconUrl: markerIcon, shadowUrl: markerShadow});
+
+const CLUJ_CENTER: [number, number] = [46.7712, 23.6236];
+const DEFAULT_ZOOM = 17;
 
 function FindSpot() {
     const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -33,12 +37,14 @@ function FindSpot() {
     const [spots, setSpots] = useState<ParkingSpot[]>([]);
     const [selectedSpot, setSelectedSpot] = useState<ParkingSpot | null>(null);
     const [searchParams, setSearchParams] = useSearchParams();
+
     const [filters, setFilters] = useState<FindSpotFilters>(() => ({
         date: searchParams.get("date") ?? "",
         timeSlotIds: searchParams.getAll("timeSlotIds"),
         minPricePerHour: searchParams.get("minPricePerHour") ?? "",
         maxPricePerHour: searchParams.get("maxPricePerHour") ?? "",
     }));
+
     const [allTimeSlots, setAllTimeSlots] = useState<TimeSlot[]>([]);
     const [showSlotPanel, setShowSlotPanel] = useState(false);
     const [searching, setSearching] = useState(false);
@@ -48,42 +54,65 @@ function FindSpot() {
     const [mapReady, setMapReady] = useState(false);
     const [filtersChanged, setFiltersChanged] = useState(false);
 
+    // ── Initial bounds from URL — read once ──────────────────
     const initialBoundsRef = useRef({
         swLat: searchParams.get("swLat"),
         swLng: searchParams.get("swLng"),
         neLat: searchParams.get("neLat"),
         neLng: searchParams.get("neLng"),
+        zoom:  searchParams.get("zoom"),
     });
-    const hasBoundsInUrl = Object.values(initialBoundsRef.current).every(Boolean);
+    const hasBoundsInUrl = Object.values(initialBoundsRef.current)
+        .filter((_, i) => i < 4) // doar swLat, swLng, neLat, neLng
+        .every(Boolean);
 
     const filtersRef = useRef<FindSpotFilters>(EMPTY_FILTERS);
     filtersRef.current = filters;
 
     const today = formatDate(new Date());
 
+    // ── Fetch available slots for selected spot ───────────────
     useEffect(() => {
         if (!selectedSpot || !filters.date) {
             setAvailableSlots([]);
             return;
         }
-
         getSlots(selectedSpot.id, filters.date)
-            .then((data) => {
-                setAvailableSlots(data.availableSlots);
-            })
+            .then((data) => setAvailableSlots(data.availableSlots))
             .catch(() => setAvailableSlots([]));
     }, [selectedSpot, filters.date]);
 
+    // ── Init map ──────────────────────────────────────────────
     useEffect(() => {
         if (!mapContainerRef.current || mapRef.current) return;
 
-        const map = L.map(mapContainerRef.current, DEFAULT_MAP_SETTINGS);
+        let initialCenter: [number, number] = CLUJ_CENTER;
+        let initialZoom = DEFAULT_ZOOM;
 
+        if (hasBoundsInUrl) {
+            const swLat = Number(initialBoundsRef.current.swLat);
+            const swLng = Number(initialBoundsRef.current.swLng);
+            const neLat = Number(initialBoundsRef.current.neLat);
+            const neLng = Number(initialBoundsRef.current.neLng);
+            initialCenter = [(swLat + neLat) / 2, (swLng + neLng) / 2];
+            initialZoom = initialBoundsRef.current.zoom
+                ? Number(initialBoundsRef.current.zoom)
+                : DEFAULT_ZOOM;
+        }
+
+        const map = L.map(mapContainerRef.current, {
+            zoomControl: false,
+            maxBounds: DEFAULT_MAP_SETTINGS.maxBounds,
+            maxBoundsViscosity: DEFAULT_MAP_SETTINGS.maxBoundsViscosity,
+            minZoom: DEFAULT_MAP_SETTINGS.minZoom,
+            center: initialCenter,
+            zoom: initialZoom,
+        });
         L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
             attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
         }).addTo(map);
 
-        L.control.zoom({position: "bottomright"}).addTo(map);
+        L.control.zoom({ position: "bottomright" }).addTo(map);
 
         markersLayerRef.current = L.layerGroup().addTo(map);
 
@@ -99,17 +128,33 @@ function FindSpot() {
         mapRef.current = map;
         setMapReady(true);
 
+        if (!hasBoundsInUrl && navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    mapRef.current?.setView(
+                        [pos.coords.latitude, pos.coords.longitude],
+                        15,
+                        { animate: true }
+                    );
+                },
+                () => {
+                },
+                { timeout: 10000 }
+            );
+        }
+
         return () => {
-            map.remove();
+            mapRef.current?.remove();
             mapRef.current = null;
         };
     }, []);
 
+    // ── Load all time slots ───────────────────────────────────
     useEffect(() => {
-        getAllTimeSlots().then(setAllTimeSlots).catch(() => {
-        });
+        getAllTimeSlots().then(setAllTimeSlots).catch(() => {});
     }, []);
 
+    // ── Render markers ────────────────────────────────────────
     useEffect(() => {
         if (!markersLayerRef.current) return;
         markersLayerRef.current.clearLayers();
@@ -124,11 +169,7 @@ function FindSpot() {
             ].filter(Boolean).join(" ");
 
             const marker = L.marker([spot.latitude, spot.longitude], {
-                icon: L.divIcon({
-                    html: el,
-                    className: "",
-                    iconAnchor: [40, 16],
-                }),
+                icon: L.divIcon({ html: el, className: "", iconAnchor: [40, 16] }),
             });
 
             marker.on("click", (e) => {
@@ -141,8 +182,9 @@ function FindSpot() {
         });
     }, [spots, selectedSpot]);
 
+    // ── Auto-search from URL params on mount ─────────────────
     useEffect(() => {
-        if (!mapReady || !hasBoundsInUrl || !filtersRef.current.date) return;
+        if (!mapReady || !hasBoundsInUrl || !filters.date) return;
 
         const boundingBox: BoundingBox = {
             swLat: Number(initialBoundsRef.current.swLat),
@@ -153,15 +195,13 @@ function FindSpot() {
 
         setSearching(true);
         searchParkingSpots({ boundingBox, filters: filtersRef.current })
-            .then((results) => {
-                setSpots(results);
-                setHasSearched(true);
-            })
+            .then((results) => { setSpots(results); setHasSearched(true); })
             .catch(() => {})
             .finally(() => setSearching(false));
 
-    }, [mapReady]);
+    }, [mapReady, filters.date]);
 
+    // ── Trigger search ────────────────────────────────────────
     const triggerSearch = async (map?: L.Map) => {
         setFiltersChanged(false);
         const m = map ?? mapRef.current;
@@ -180,7 +220,8 @@ function FindSpot() {
             swLng: String(boundingBox.swLng),
             neLat: String(boundingBox.neLat),
             neLng: String(boundingBox.neLng),
-            date: filtersRef.current.date,
+            zoom:  String(m.getZoom()),
+            date:  filtersRef.current.date,
         };
         if (filtersRef.current.timeSlotIds.length > 0)
             params.timeSlotIds = filtersRef.current.timeSlotIds;
@@ -195,7 +236,7 @@ function FindSpot() {
         setSelectedSpot(null);
 
         try {
-            const results = await searchParkingSpots({boundingBox, filters: filtersRef.current});
+            const results = await searchParkingSpots({ boundingBox, filters: filtersRef.current });
             setSpots(results);
             setHasSearched(true);
         } catch {
@@ -244,9 +285,8 @@ function FindSpot() {
 
     return (
         <div className="find-spot">
-            {/* ── Filter bar ─────────────────────────────────────── */}
+            {/* ── Filter bar ── */}
             <div className="find-spot__filters">
-                {/*Back*/}
                 <Link to="/">
                     <button
                         className={`find-spot__filter-btn ${filters.date ? "find-spot__filter-btn--active" : "find-spot__filter-btn--highlighted"}`}
@@ -256,7 +296,6 @@ function FindSpot() {
                     </button>
                 </Link>
 
-                {/* Date — gate filter */}
                 <div className="find-spot__date-wrap">
                     <Calendar size={14}/>
                     <input
@@ -271,12 +310,9 @@ function FindSpot() {
                     />
                 </div>
 
-                {/* Only show remaining filters if date is selected */}
                 {filters.date && (
                     <>
                         <div className="find-spot__filter-divider"/>
-
-                        {/* Time slots */}
                         <button
                             className={`find-spot__filter-btn ${filters.timeSlotIds.length > 0 ? "find-spot__filter-btn--active" : ""}`}
                             onClick={() => setShowSlotPanel((p) => !p)}
@@ -286,12 +322,8 @@ function FindSpot() {
                                 ? `${filters.timeSlotIds.length} interval${filters.timeSlotIds.length > 1 ? "e" : ""}`
                                 : "Intervale"}
                         </button>
-
                         <div className="find-spot__filter-divider"/>
-
-                        {/* Price */}
-                        <button
-                            className={`find-spot__filter-btn ${filters.minPricePerHour || filters.maxPricePerHour ? "find-spot__filter-btn--active" : ""}`}>
+                        <button className={`find-spot__filter-btn ${filters.minPricePerHour || filters.maxPricePerHour ? "find-spot__filter-btn--active" : ""}`}>
                             <SlidersHorizontal size={14}/>
                             <div className="find-spot__filter-price-wrap">
                                 <input
@@ -317,7 +349,6 @@ function FindSpot() {
                     </>
                 )}
 
-                {/* Clear */}
                 {hasActiveFilters && (
                     <>
                         <div className="find-spot__filter-divider"/>
@@ -328,18 +359,15 @@ function FindSpot() {
                 )}
             </div>
 
-            {/* ── Time slot panel ─────────────────────────────────── */}
+            {/* ── Time slot panel ── */}
             {showSlotPanel && (
                 <div className="find-spot__slot-panel">
                     <p className="find-spot__slot-panel-title">Selectează intervalele</p>
-                    {allTimeSlots.map((slot) =>
-                        {
-                            const now: number = new Date().getHours();
-
-                            if (slot.startHour < now)
-                                return;
-
-                            return <div
+                    {allTimeSlots.map((slot) => {
+                        const now = new Date().getHours();
+                        if (slot.startHour < now) return null;
+                        return (
+                            <div
                                 key={slot.id}
                                 className={`find-spot__slot-chip ${filters.timeSlotIds.includes(slot.id) ? "find-spot__slot-chip--selected" : ""}`}
                                 onClick={() => toggleSlot(slot.id)}
@@ -347,15 +375,15 @@ function FindSpot() {
                                 <span>{formatHour(slot.startHour)} → {formatHour(slot.endHour)}</span>
                                 {filters.timeSlotIds.includes(slot.id) && <X size={12}/>}
                             </div>
-                        }
-                    )}
+                        );
+                    })}
                 </div>
             )}
 
-            {/* ── Map ─────────────────────────────────────────────── */}
+            {/* ── Map ── */}
             <div ref={mapContainerRef} className="find-spot__map"/>
 
-            {/* ── Empty hint — shown before date is selected ───────── */}
+            {/* ── Empty hint ── */}
             {!filters.date && (
                 <div className="find-spot__hint">
                     <ParkingSquare size={32} strokeWidth={1.5}/>
@@ -363,7 +391,7 @@ function FindSpot() {
                 </div>
             )}
 
-            {/* ── No results after search ───────────────────────────── */}
+            {/* ── No results ── */}
             {hasSearched && spots.length === 0 && !searching && !mapMoved && !filtersChanged && (
                 <div className="find-spot__hint find-spot__hint--no-results">
                     <ParkingSquare size={32} strokeWidth={1.5}/>
@@ -371,7 +399,7 @@ function FindSpot() {
                 </div>
             )}
 
-            {/* ── Search in area button ────────────────────────────── */}
+            {/* ── Search button ── */}
             {(mapMoved || filtersChanged) && filters.date && (
                 <button
                     className="find-spot__search-btn"
@@ -383,14 +411,16 @@ function FindSpot() {
                 </button>
             )}
 
-            {/* ── Spot popup ───────────────────────────────────────── */}
+            {/* ── Spot popup ── */}
             {selectedSpot && (
-                <AuthGuard children={<SpotPopup
-                    spot={selectedSpot}
-                    date={filters.date}
-                    availableSlots={availableSlots}
-                    onBook={handleBook}
-                />}/>
+                <AuthGuard children={
+                    <SpotPopup
+                        spot={selectedSpot}
+                        date={filters.date}
+                        availableSlots={availableSlots}
+                        onBook={handleBook}
+                    />
+                }/>
             )}
         </div>
     );

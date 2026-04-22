@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
@@ -41,4 +42,18 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     AND s.date >= :today
 """)
     boolean hasActiveBooking(@Param("spotId") UUID spotId, @Param("userId") UUID userId, @Param("today") LocalDate today);
+
+    @Query("""
+    SELECT b.client.id FROM Booking b
+    JOIN b.reservedSlots s
+    WHERE s.parkingSpot.id = :spotId
+    AND s.date >= :today
+    AND b.status = 'CONFIRMED'
+    ORDER BY s.date ASC
+    LIMIT 1
+""")
+    Optional<UUID> findActiveBuyerBySpotId(
+            @Param("spotId") UUID spotId,
+            @Param("today") LocalDate today
+    );
 }

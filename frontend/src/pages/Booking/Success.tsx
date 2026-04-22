@@ -5,7 +5,7 @@ export default function BookingSuccess() {
         <div style={{ textAlign: "center", padding: "4rem" }}>
             <h1>Rezervare confirmată! 🎉</h1>
             <p>Plata a fost procesată cu succes.</p>
-            <Link to="/">Înapoi la hartă</Link>
+            <Link to="/bookings">Vezi rezervările facute</Link>
         </div>
     );
 }

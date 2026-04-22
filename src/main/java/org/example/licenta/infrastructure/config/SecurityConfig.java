@@ -34,6 +34,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/bookings/validate").permitAll()
                         .requestMatchers("/api/bookings/webhook").permitAll()
                         .requestMatchers("/api/parking-spot/search").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/users/*/name").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/bookings/buyer").permitAll()
                         .anyRequest().permitAll()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
