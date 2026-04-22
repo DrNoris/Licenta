@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, {useEffect, useState} from "react";
 import { createPortal } from "react-dom";
 import { X, DollarSign, MapPin, Camera } from "lucide-react";
 import { type AddSpotFormState, type AddSpotModalProps, EMPTY_FORM } from "./AddSpotModal.types.ts";
@@ -11,6 +11,19 @@ import type {LatLng} from "../../LocationPicker/LocationPicker.types.ts";
 
 function AddSpotModal({ open, onClose, onAdd }: AddSpotModalProps) {
     const [form, setForm] = useState<AddSpotFormState>(EMPTY_FORM);
+    const [userLocation, setUserLocation] = useState<LatLng | null>(null);
+
+    useEffect(() => {
+        if (!navigator.geolocation) return;
+        navigator.geolocation.getCurrentPosition(
+            (pos) => setUserLocation({
+                lat: pos.coords.latitude,
+                lng: pos.coords.longitude,
+            }),
+            () => {},
+            { timeout: 10000 }
+        );
+    }, []);
 
     useBodyScrollLock(open);
 
@@ -167,11 +180,12 @@ function AddSpotModal({ open, onClose, onAdd }: AddSpotModalProps) {
                             )}
                             <LocationPicker
                                 value={form.latitude !== null && form.longitude !== null
-                                    ? {lat: form.latitude, lng: form.longitude}
+                                    ? { lat: form.latitude, lng: form.longitude }
                                     : null
                                 }
                                 onChange={handleLocationChange}
                                 disabled={form.loading}
+                                initialCenter={userLocation ?? undefined}
                             />
                         </div>
 

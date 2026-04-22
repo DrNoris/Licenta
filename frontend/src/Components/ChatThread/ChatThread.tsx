@@ -62,9 +62,12 @@ function ChatThread({ conversation }: ChatThreadProps) {
             .catch(() => {})
             .finally(() => {
                 setLoading(false);
-                setTimeout(() => {
-                    initialLoadDoneRef.current = true;
-                }, 600);
+                requestAnimationFrame(() => {
+                    bottomRef.current?.scrollIntoView({ behavior: "instant" });
+                    setTimeout(() => {
+                        initialLoadDoneRef.current = true;
+                    }, 600);
+                });
             });
 
         markAsRead(conversation.id).catch(() => {});
@@ -196,6 +199,8 @@ function ChatThread({ conversation }: ChatThreadProps) {
     }, [conversation.id]);
 
     useEffect(() => {
+        if (!initialLoadDoneRef.current) return;
+
         const container = messagesContainerRef.current;
         if (!container) return;
 
@@ -217,17 +222,6 @@ function ChatThread({ conversation }: ChatThreadProps) {
         if (textareaRef.current) {
             textareaRef.current.style.height = "auto";
         }
-
-        const optimisticMsg: ChatMessage = {
-            id: crypto.randomUUID(),
-            conversationId: conversation.id,
-            senderId: currentUserId,
-            senderName: "",
-            content,
-            sentAt: new Date().toISOString(),
-            readAt: null,
-        };
-        setMessages((prev) => [...prev, optimisticMsg]);
 
         const ws = wsRef.current;
         if (ws && ws.readyState === WebSocket.OPEN) {

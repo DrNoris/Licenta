@@ -162,4 +162,9 @@ public class BookingService {
     public boolean hasActiveBooking(UUID spotId, UUID requesterId){
         return bookingRepository.hasActiveBooking(spotId, requesterId, LocalDate.now());
     }
+
+    public UUID getActiveBuyerForSpot(UUID spotId) {
+        return bookingRepository.findActiveBuyerBySpotId(spotId, LocalDate.now())
+                .orElseThrow(() -> new NoSuchElementException("No active booking found"));
+    }
 }

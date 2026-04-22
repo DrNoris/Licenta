@@ -40,35 +40,60 @@ public class ChatService {
         return conversationRepository
                 .findByBuyerIdOrSellerIdOrderByLastMessageAtDesc(userId, userId)
                 .stream()
-                .map(c -> chatMapper.toResponse(c, userId))
+                .map(c -> {
+                    ConversationResponse response = chatMapper.toResponse(c, userId);
+                    response.setUnreadCount(messageRepository.countUnreadMessages(c.getId(), userId));
+                    return response;
+                })
                 .toList();
     }
 
     @Transactional
     public ConversationResponse getOrCreateConversation(
             CreateConversationRequest request,
-            UUID buyerId,
-            String buyerName
+            UUID requesterId,
+            String requesterName
     ) {
-        return conversationRepository.findByParkingSpotIdAndBuyerId(request.getParkingSpotId(), buyerId)
-                .map(c -> chatMapper.toResponse(c, buyerId))
+        return conversationRepository
+                .findByParkingSpotIdAndBuyerIdOrParkingSpotIdAndSellerId(
+                        request.getParkingSpotId(), requesterId,
+                        request.getParkingSpotId(), requesterId
+                )
+                .map(c -> chatMapper.toResponse(c, requesterId))
                 .orElseGet(() -> {
-                    validateBooking(request.getParkingSpotId(), buyerId);
+                    ParkingSpotResponse spotData = fetchOwnerData(request.getParkingSpotId());
 
-                    ParkingSpotResponse ownerData = fetchOwnerData(request.getParkingSpotId());
+                    UUID buyerId;
+                    String buyerName;
+                    UUID sellerId;
+                    String sellerName;
+
+                    if (spotData.getOwnerId().equals(requesterId)) {
+                        UUID actualBuyerId = fetchBuyerFromBooking(request.getParkingSpotId());
+                        sellerId = requesterId;
+                        sellerName = requesterName;
+                        buyerId = actualBuyerId;
+                        buyerName = fetchUserName(actualBuyerId);
+                    } else {
+                        validateBooking(request.getParkingSpotId(), requesterId);
+                        buyerId = requesterId;
+                        buyerName = requesterName;
+                        sellerId = spotData.getOwnerId();
+                        sellerName = spotData.getOwnerName();
+                    }
 
                     Conversation conversation = Conversation.builder()
                             .parkingSpotId(request.getParkingSpotId())
-                            .parkingSpotAddress(ownerData.getSpotAddress())
+                            .parkingSpotAddress(spotData.getSpotAddress())
                             .buyerId(buyerId)
                             .buyerName(buyerName)
-                            .sellerId(ownerData.getOwnerId())
-                            .sellerName(ownerData.getOwnerName())
+                            .sellerId(sellerId)
+                            .sellerName(sellerName)
                             .createdAt(LocalDateTime.now())
                             .build();
 
                     return chatMapper.toResponse(
-                            conversationRepository.save(conversation), buyerId
+                            conversationRepository.save(conversation), requesterId
                     );
                 });
     }
@@ -146,5 +171,26 @@ public class ChatService {
                 ParkingSpotResponse.class,
                 spotId
         );
+    }
+
+    private UUID fetchBuyerFromBooking(UUID spotId) {
+        return restTemplate.getForObject(
+                mainAppUrl + "/api/bookings/buyer?spotId={s}",
+                UUID.class,
+                spotId
+        );
+    }
+
+    private String fetchUserName(UUID userId) {
+        try {
+            return restTemplate.getForObject(
+                    mainAppUrl + "/api/users/{id}/name",
+                    String.class,
+                    userId
+            );
+        } catch (Exception e) {
+            log.warn("Could not fetch user name for {}: {}", userId, e.getMessage());
+            return "Utilizator";
+        }
     }
 }
