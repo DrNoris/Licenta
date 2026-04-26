@@ -23,6 +23,8 @@ public class CloudinaryService {
     public String uploadPrivate(MultipartFile file, String folder) throws IOException {
         Map result = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap(
                 "folder", folder,
+                "format", "jpg",
+                "transformation", "q_auto,f_auto",
                 "type", "authenticated",
                 "resource_type", "image"
         ));

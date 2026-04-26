@@ -3,7 +3,7 @@ import { UploadCloud, X } from "lucide-react";
 import type { PhotoUploaderProps } from "./PhotoUploader.types.ts";
 import "./PhotoUploader.styles.css";
 
-const ACCEPTED = ["image/jpeg", "image/png", "image/webp"];
+const ACCEPTED = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/heic", "image/heif"];
 
 function PhotoUploader({ files, onChange, disabled = false, maxFiles = 5 }: PhotoUploaderProps) {
     const inputRef = useRef<HTMLInputElement>(null);
@@ -48,7 +48,7 @@ function PhotoUploader({ files, onChange, disabled = false, maxFiles = 5 }: Phot
                         Trage fotografiile aici sau <strong>apasă pentru a selecta</strong>
                     </p>
                     <p className="photo-uploader__hint">
-                        JPG, PNG, WEBP · Maxim {maxFiles} fotografii · {files.length}/{maxFiles} adăugate
+                        Maxim {maxFiles} fotografii · {files.length}/{maxFiles} adăugate
                     </p>
                 </div>
             )}
