@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
@@ -191,7 +192,9 @@ public class ParkingSpotService {
                 .map(spot -> {
                     ParkingSpotResponse response = parkingSpotMapper.toResponse(spot);
 
-                    if (currentTimeSlotId != null && parsedSlotIds == null && parsedDate != null && parsedDate.equals(LocalDate.now())) {
+                    LocalDate todayInRomania = LocalDate.now(ZoneId.of("Europe/Bucharest"));
+
+                    if (currentTimeSlotId != null && parsedSlotIds == null && parsedDate != null && parsedDate.equals(todayInRomania)) {
                         boolean availableNow = parkingSpotSlotRepository
                                 .existsByParkingSpotIdAndTimeSlotIdAndDateAndBookingIsNull(
                                         spot.getId(), currentTimeSlotId, parsedDate
