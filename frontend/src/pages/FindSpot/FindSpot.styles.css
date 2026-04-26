@@ -96,7 +96,7 @@
 /* ── Search in area button ───────────────────────────────────── */
 .find-spot__search-btn {
     position: absolute;
-    bottom: 8rem;
+    bottom: 2rem;
     left: 50%;
     transform: translateX(-50%);
     z-index: 50;
