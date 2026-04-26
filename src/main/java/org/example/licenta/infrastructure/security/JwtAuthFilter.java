@@ -37,11 +37,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
 
         try {
-
             String token = authHeader.substring(7);
-
             Jws<Claims> claims = jwtService.validate(token);
-
             String userId = claims.getBody().getSubject();
 
             UsernamePasswordAuthenticationToken authentication =
@@ -50,28 +47,30 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                             null,
                             Collections.emptyList()
                     );
-
-            SecurityContextHolder.getContext()
-                    .setAuthentication(authentication);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
 
         } catch (Exception e) {
-
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return;
+            if (!isPublicRoute(request)) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                return;
+            }
         }
 
         filterChain.doFilter(request, response);
     }
 
-    @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
+    private boolean isPublicRoute(HttpServletRequest request) {
         String path = request.getServletPath();
         String method = request.getMethod();
-
         return path.startsWith("/api/auth/") ||
                 path.equals("/api/bookings/webhook") ||
                 (path.equals("/api/parking-spot/search") && method.equals("GET")) ||
                 (path.equals("/api/bookings/buyer") && method.equals("GET")) ||
                 (path.matches("/api/users/.*/name") && method.equals("GET"));
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        return false;
     }
 }
