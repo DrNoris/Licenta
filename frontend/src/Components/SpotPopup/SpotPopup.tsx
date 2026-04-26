@@ -58,16 +58,18 @@ function SpotPopup({ spot, date, availableSlots, onBook }: SpotPopupProps) {
                         <p className="spot-popup__slots-empty">Niciun interval disponibil</p>
                     ) : (
                         <div className="spot-popup__slots-list">
-                            {availableSlots.sort((a, b) => a.startHour < b.startHour ? -1 : 1).map((slot) => (
-                                <button
-                                    key={slot.id}
-                                    className={`spot-popup__slot-chip ${isSelected(slot) ? "spot-popup__slot-chip--selected" : ""}`}
-                                    onClick={() => toggleSlot(slot)}
-                                    type="button"
-                                >
-                                    {formatHour(slot.startHour)} → {formatHour(slot.endHour)}
-                                </button>
-                            ))}
+                            {availableSlots
+                                .sort((a, b) => a.startHour - b.startHour)
+                                .map((slot) => (
+                                    <button
+                                        key={slot.id}
+                                        className={`spot-popup__slot-chip ${isSelected(slot) ? "spot-popup__slot-chip--selected" : ""}`}
+                                        onClick={() => toggleSlot(slot)}
+                                        type="button"
+                                    >
+                                        {formatHour(slot.startHour)} → {formatHour(slot.endHour)}
+                                    </button>
+                                ))}
                         </div>
                     )}
                 </div>

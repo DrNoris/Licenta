@@ -519,3 +519,33 @@
 .find-spot__marker--active.find-spot__marker--available-now {
     background-color: #15803d;
 }
+
+.spot-popup__slots-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    max-height: 12rem;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 0.25rem;
+    scrollbar-width: thin;
+    scrollbar-color: #d1d5db transparent;
+}
+
+.spot-popup__slots-list::-webkit-scrollbar {
+    width: 4px;
+    display: block;
+}
+
+.spot-popup__slots-list::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 9999px;
+}
+
+.spot-popup__slots-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.4rem;
+    max-height: 12rem;
+    overflow-y: auto;
+}

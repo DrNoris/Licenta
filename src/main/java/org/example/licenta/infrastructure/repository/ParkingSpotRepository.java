@@ -13,8 +13,9 @@ public interface ParkingSpotRepository extends JpaRepository<ParkingSpot, UUID> 
     List<ParkingSpot> findByOwnerId(UUID ownerId);
 
     @Query("""
-        SELECT p FROM ParkingSpotSlot s
+        SELECT DISTINCT p FROM ParkingSpotSlot s
         JOIN s.parkingSpot p
+        LEFT JOIN FETCH p.images
         WHERE p.latitude  BETWEEN :swLat AND :neLat
         AND   p.longitude BETWEEN :swLng AND :neLng
         AND   (:minPrice IS NULL OR p.pricePerHour >= :minPrice)
