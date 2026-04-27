@@ -30,7 +30,14 @@ export default function App() {
                     <Route path="/chat/:conversationId" element={<AuthGuard><ChatPage /></AuthGuard>} />
                 </Routes>
             </BrowserRouter>
-            <Toaster position="bottom-center" />
+            <Toaster
+                position="bottom-center"
+                toastOptions={{
+                    duration: 3000,
+                    success: { duration: 3000 },
+                    error: { duration: 4000 }
+                }}
+            />
         </>
     )
 }

@@ -247,7 +247,13 @@ function RentModal({ isOpen, onClose, spotId, spotDescription, onUpdateTimeSlots
                             className="rent-modal__date-input"
                             value={selectedDate}
                             min={today}
-                            onChange={(e) => setSelectedDate(e.target.value)}
+                            onChange={(e) => {
+                                if (e.target.value < today) {
+                                    toast.error("Nu poți selecta o dată din trecut.");
+                                    return;
+                                }
+                                setSelectedDate(e.target.value)
+                            }}
                         />
                     </div>
 
@@ -298,7 +304,13 @@ function RentModal({ isOpen, onClose, spotId, spotDescription, onUpdateTimeSlots
                                     className="rent-modal__date-input"
                                     value={stopDate}
                                     min={selectedDate}
-                                    onChange={(e) => setStopDate(e.target.value)}
+                                    onChange={(e) => {
+                                        if (e.target.value < today) {
+                                            toast.error("Nu poți selecta o dată din trecut.");
+                                            return;
+                                        }
+                                        setStopDate(e.target.value)
+                                    }}
                                 />
                             </div>
                         )}
