@@ -236,8 +236,14 @@ function FindSpot() {
         setMapMoved(false);
         setSelectedSpot(null);
 
+        const searchParlingSpotPromise = searchParkingSpots({ boundingBox, filters: filtersRef.current });
+
+        toast.promise(searchParlingSpotPromise, {
+            loading: "Se caută locuri de parcare..."
+        });
+
         try {
-            const results = await searchParkingSpots({ boundingBox, filters: filtersRef.current });
+            const results = await searchParlingSpotPromise;
             setSpots(results);
             setHasSearched(true);
         } catch {
