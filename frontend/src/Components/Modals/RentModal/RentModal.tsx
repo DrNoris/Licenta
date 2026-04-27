@@ -7,6 +7,7 @@ import { formatDate, getAllTimeSlots, manageSlots } from "../../../services/rent
 import SlotItem from "./Slotitem.tsx";
 import "./RentModal.styles.css";
 import { useBodyScrollLock } from "../../../hooks/useBodyScrollLock.ts";
+import toast from "react-hot-toast";
 
 type RecurrenceType = "none" | "daily" | "weekdays" | "weekly" | "biweekly";
 
@@ -181,8 +182,13 @@ function RentModal({ isOpen, onClose, spotId, spotDescription, onUpdateTimeSlots
     };
 
     const handleConfirm = (): void => {
-        onUpdateTimeSlots(spotId, selectedDates, slotsToAdd, slotsToDelete);
+        const onUpdatePromise = onUpdateTimeSlots(spotId, selectedDates, slotsToAdd, slotsToDelete);
         onClose();
+        toast.promise(onUpdatePromise, {
+            loading: "Se modifică disponibilitatea locului de parcare...",
+            success: "Disponibilitatea loculul de parcare a fost editată!",
+            error: "Modificarea a eșuat. Încearcă din nou.",
+        });
     };
 
     const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>): void => {
@@ -320,8 +326,6 @@ function RentModal({ isOpen, onClose, spotId, spotDescription, onUpdateTimeSlots
                         {!availabilityLoading && !error && allSlots.length > 0 && (
                             <div className="rent-modal__slots-wrap">
                                 {allSlots.map((slot) => {
-
-
                                     return <SlotItem
                                         key={slot.id}
                                         slot={slot}

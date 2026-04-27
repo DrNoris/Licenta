@@ -8,6 +8,7 @@ import PhotoUploader from "../../PhotoUploader/PhotoUploader.tsx";
 import { useBodyScrollLock } from "../../../hooks/useBodyScrollLock.ts";
 import "./AddSpotModal.styles.css";
 import type {LatLng} from "../../LocationPicker/LocationPicker.types.ts";
+import toast from "react-hot-toast";
 
 function AddSpotModal({ open, onClose, onAdd }: AddSpotModalProps) {
     const [form, setForm] = useState<AddSpotFormState>(EMPTY_FORM);
@@ -50,34 +51,59 @@ function AddSpotModal({ open, onClose, onAdd }: AddSpotModalProps) {
     const handleSubmit = async (e: React.FormEvent): Promise<void> => {
         e.preventDefault();
 
-        if (!form.description || !form.pricePerHour) {
-            setForm((prev) => ({ ...prev, error: "Completați descrierea și prețurile." }));
+        if (form.description.length < 5) {
+            toast.error("Descrierea este prea scurta, minim 10 caractere.");
             return;
         }
-        if (form.latitude === null || form.longitude === null) {
-            setForm((prev) => ({ ...prev, error: "Selectați locația pe hartă." }));
+
+        if (parseFloat(form.pricePerHour) < 0.2) {
+            toast.error("Prețul minim per oră este 0.2 lei.");
+            return;
+        }
+
+        if (form.files.length == 0) {
+            toast.error("Este necesară minim o poză.");
+            return;
+        }
+
+        if (
+            form.latitude == null ||
+            form.longitude == null ||
+            form.latitude > 46.82445078216992 ||
+            form.latitude < 46.728161 ||
+            form.longitude < 23.454361 ||
+            form.longitude > 23.715712
+        ) {
+            toast.error("Selectează o locație validă în Cluj-Napoca.");
             return;
         }
 
         setForm((prev) => ({ ...prev, loading: true, error: "" }));
 
+        const addPromise = addParkingSpot(
+            {
+                description: form.description,
+                address: form.address,
+                pricePerHour: parseFloat(form.pricePerHour),
+                latitude: form.latitude,
+                longitude: form.longitude,
+            },
+            form.files
+        );
+
+        toast.promise(addPromise, {
+            loading: "Se adaugă locul de parcare...",
+            success: "Locul de parcare a fost adăugat!",
+            error: "Adăugarea a eșuat. Încearcă din nou.",
+        });
+
         try {
-            const newSpot = await addParkingSpot(
-                {
-                    description: form.description,
-                    address: form.address,
-                    pricePerHour: parseFloat(form.pricePerHour),
-                    latitude: form.latitude,
-                    longitude: form.longitude,
-                },
-                form.files
-            );
+            const newSpot = await addPromise;
             onAdd(newSpot);
             setForm(EMPTY_FORM);
             onClose();
-        } catch (err: unknown) {
-            const message = err instanceof Error ? err.message : "Adăugarea a eșuat.";
-            setForm((prev) => ({ ...prev, error: message, loading: false }));
+        } catch {
+            setForm((prev) => ({ ...prev, loading: false }));
         }
     };
 
@@ -139,7 +165,7 @@ function AddSpotModal({ open, onClose, onAdd }: AddSpotModalProps) {
                                 <input
                                     id="pricePerHour"
                                     type="number"
-                                    min="0"
+                                    min="0.2"
                                     step="0.01"
                                     className="add-spot-modal__input"
                                     value={form.pricePerHour}
@@ -156,7 +182,7 @@ function AddSpotModal({ open, onClose, onAdd }: AddSpotModalProps) {
                         <div>
                             <p className="add-spot-modal__section-label">
                                 <Camera size={13} style={{display: "inline", marginRight: "0.3rem"}}/>
-                                Fotografii
+                                Fotografii *
                             </p>
                             <PhotoUploader
                                 files={form.files}

@@ -4,6 +4,7 @@ import { Trash2, X } from "lucide-react";
 import type { DeleteModalProps } from "./DeleteModal.types.ts";
 import { useBodyScrollLock } from "../../../hooks/useBodyScrollLock.ts";
 import "./DeleteModal.styles.css";
+import toast from "react-hot-toast";
 
 function DeleteModal({ isOpen, spotId, onDelete, onClose }: DeleteModalProps) {
     const [loading, setLoading] = useState(false);
@@ -14,10 +15,20 @@ function DeleteModal({ isOpen, spotId, onDelete, onClose }: DeleteModalProps) {
 
     const handleDelete = async (): Promise<void> => {
         setLoading(true);
+
+        const deletePromise = onDelete(spotId);
+
+        toast.promise(deletePromise, {
+            loading: "Se șterge locul de parcare...",
+            success: "Locul de parcare a fost șters!",
+            error: "Ștergerea a eșuat. Încearcă din nou.",
+        });
+
         try {
-            await onDelete(spotId);
-            console.log("delete modal")
             onClose();
+            await deletePromise;
+        } catch {
+            // toast handles the error display
         } finally {
             setLoading(false);
         }

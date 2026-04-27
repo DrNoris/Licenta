@@ -19,6 +19,7 @@ import {DEFAULT_MAP_SETTINGS} from "../../Components/LocationPicker/LocationPick
 import {getSlots} from "../../services/parkingSpotSlotService.ts";
 import {createCheckoutSession} from "../../services/bookingService.ts";
 import AuthGuard from "../../Components/AuthGuard/AuthGuard.tsx";
+import toast from "react-hot-toast";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error
@@ -271,6 +272,13 @@ function FindSpot() {
         !!filters.minPricePerHour || !!filters.maxPricePerHour;
 
     const handleBook = async (spot: ParkingSpot, selectedSlots: TimeSlot[]) => {
+        const totalAmount = selectedSlots.length * spot.pricePerHour;
+
+        if (totalAmount < 2) {
+            toast.error("Suma minimă pentru o rezervare este de 2 lei.");
+            return;
+        }
+
         try {
             const url = await createCheckoutSession(
                 spot.id,
