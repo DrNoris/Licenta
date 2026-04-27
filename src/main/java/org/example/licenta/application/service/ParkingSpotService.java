@@ -193,7 +193,6 @@ public class ParkingSpotService {
                     ParkingSpotResponse response = parkingSpotMapper.toResponse(spot);
 
                     LocalDate todayInRomania = LocalDate.now(ZoneId.of("Europe/Bucharest"));
-
                     if (currentTimeSlotId != null && parsedSlotIds == null && parsedDate != null && parsedDate.equals(todayInRomania)) {
                         boolean availableNow = parkingSpotSlotRepository
                                 .existsByParkingSpotIdAndTimeSlotIdAndDateAndBookingIsNull(
