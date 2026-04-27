@@ -312,6 +312,10 @@ function FindSpot() {
                         value={filters.date}
                         min={today}
                         onChange={(e) => {
+                            if (e.target.value < today) {
+                                toast.error("Nu poți selecta o dată din trecut.");
+                                return;
+                            }
                             setFilters((prev) => ({...prev, date: e.target.value}));
                             setFiltersChanged(true);
                         }}
