@@ -1,6 +1,6 @@
 export interface DeleteModalProps {
     isOpen: boolean;
     spotId: string;
-    onDelete: (id: string) => void;
+    onDelete: (spotId: string) => Promise<void>;
     onClose: () => void;
 }

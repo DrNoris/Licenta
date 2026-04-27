@@ -29,12 +29,12 @@ function ManageParkingSpots() {
     }, []);
 
     // ── Delete ──────────────────────────────────────────────────
-    const handleDelete = async (id: string): Promise<void> => {
+    const handleDelete = async (spotId: string): Promise<void> => {
         try {
-            await deleteParkingSpot(id);
+            await deleteParkingSpot(spotId);
             setState((prev) => ({
                 ...prev,
-                spots: prev.spots.filter((s) => s.id !== id),
+                spots: prev.spots.filter((s) => s.id !== spotId),
             }));
         } catch (err: unknown) {
             const message = err instanceof Error ? err.message : "Ștergerea a eșuat.";

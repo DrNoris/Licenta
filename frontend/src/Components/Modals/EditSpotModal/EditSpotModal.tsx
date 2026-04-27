@@ -6,6 +6,7 @@ import { getSignedImageUrls } from "../../../services/parkingSpotService.ts";
 import PhotoUploader from "../../PhotoUploader/PhotoUploader.tsx";
 import { useBodyScrollLock } from "../../../hooks/useBodyScrollLock.ts";
 import "./EditSpotModal.styles.css";
+import toast from "react-hot-toast";
 
 function EditSpotModal({ isOpen, spot, onClose, onEdit }: EditSpotModalProps) {
     const [form, setForm] = useState<EditSpotFormState>({
@@ -75,6 +76,21 @@ function EditSpotModal({ isOpen, spot, onClose, onEdit }: EditSpotModalProps) {
     const handleSubmit = async (e: React.FormEvent): Promise<void> => {
         e.preventDefault();
 
+        if (!form.description || form.description.length < 5) {
+            toast.error("Descrierea este prea scurta, minim 10 caractere.");
+            return;
+        }
+
+        if (!form.pricePerHour || parseFloat(form.pricePerHour) < 0.2) {
+            toast.error("Prețul minim per oră este 0.2 lei.");
+            return;
+        }
+
+        if (remainingSlots == 5) {
+            toast.error("Este necesară minim o poză.");
+            return;
+        }
+
         if (!form.description || !form.pricePerHour) {
             setForm((prev) => ({ ...prev, error: "Completați toate câmpurile obligatorii." }));
             return;
@@ -86,17 +102,24 @@ function EditSpotModal({ isOpen, spot, onClose, onEdit }: EditSpotModalProps) {
 
         setForm((prev) => ({ ...prev, loading: true, error: "" }));
 
+        const editPromise = onEdit(
+            form.description,
+            parseFloat(form.pricePerHour),
+            form.newFiles,
+            publicIdsToDelete
+        );
+
+        toast.promise(editPromise, {
+            loading: "Se salvează modificările...",
+            success: "Locul de parcare a fost actualizat!",
+            error: "Editarea a eșuat. Încearcă din nou.",
+        });
+
         try {
-            await onEdit(
-                form.description,
-                parseFloat(form.pricePerHour),
-                form.newFiles,
-                publicIdsToDelete
-            );
+            await editPromise;
             onClose();
-        } catch (err: unknown) {
-            const message = err instanceof Error ? err.message : "Editarea a eșuat.";
-            setForm((prev) => ({ ...prev, error: message, loading: false }));
+        } catch {
+            setForm((prev) => ({ ...prev, loading: false }));
         }
     };
 
@@ -158,7 +181,7 @@ function EditSpotModal({ isOpen, spot, onClose, onEdit }: EditSpotModalProps) {
                                     <input
                                         id="pricePerHour"
                                         type="number"
-                                        min="0"
+                                        min="0.2"
                                         step="0.01"
                                         className="edit-spot-modal__input"
                                         value={form.pricePerHour}
