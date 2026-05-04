@@ -73,6 +73,8 @@ function RentModal({ isOpen, onClose, spotId, spotDescription, onUpdateTimeSlots
     const allSlotsLoadedRef = useRef(false);
     const lastFetchedDateRef = useRef<string>("");
     const recurrenceRef = useRef<HTMLDivElement>(null);
+    const datePickerRef = useRef(null);
+    const endPickerRef = useRef(null);
 
     const hasAdditions = slotsToAdd.length > 0;
     const hasDeletions = slotsToDelete.length > 0;
@@ -80,6 +82,7 @@ function RentModal({ isOpen, onClose, spotId, spotDescription, onUpdateTimeSlots
     const selectedDates = recurrenceActive && stopDate
         ? generateDates(selectedDate, recurrence, stopDate)
         : [selectedDate];
+
 
     // Close recurrence dropdown on outside click
     useEffect(() => {
@@ -237,12 +240,13 @@ function RentModal({ isOpen, onClose, spotId, spotDescription, onUpdateTimeSlots
                 <div className="rent-modal__body">
 
                     {/* Date picker */}
-                    <div>
+                    <div onClick={() => datePickerRef.current?.showPicker()}>
                         <p className="rent-modal__section-label">
                             <CalendarDays size={13} style={{ display: "inline", marginRight: "0.3rem" }} />
                             Selectează data
                         </p>
                         <input
+                            ref = {datePickerRef}
                             type="date"
                             className="rent-modal__date-input"
                             value={selectedDate}
@@ -294,12 +298,13 @@ function RentModal({ isOpen, onClose, spotId, spotDescription, onUpdateTimeSlots
 
                         {/* Stop date — only when recurrence is active */}
                         {recurrence !== "none" && (hasAdditions || hasDeletions) && (
-                            <div className="rent-modal__stop-date">
+                            <div className="rent-modal__stop-date" onClick={() => endPickerRef.current?.showPicker()}>
                                 <p className="rent-modal__section-label" style={{ marginBottom: "0.3rem" }}>
                                     <CalendarDays size={13} style={{ display: "inline", marginRight: "0.3rem" }} />
                                     Până la
                                 </p>
                                 <input
+                                    ref={endPickerRef}
                                     type="date"
                                     className="rent-modal__date-input"
                                     value={stopDate}

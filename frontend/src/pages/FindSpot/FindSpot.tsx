@@ -34,6 +34,7 @@ function FindSpot() {
     const mapRef = useRef<L.Map | null>(null);
     const markersLayerRef = useRef<L.LayerGroup | null>(null);
     const dateInputRef = useRef<HTMLInputElement>(null);
+    const inputRef = useRef(null);
 
     const [spots, setSpots] = useState<ParkingSpot[]>([]);
     const [selectedSpot, setSelectedSpot] = useState<ParkingSpot | null>(null);
@@ -163,14 +164,26 @@ function FindSpot() {
         spots.forEach((spot) => {
             const el = document.createElement("div");
             const isActive = selectedSpot?.id === spot.id;
-            el.className = [
-                "find-spot__marker",
-                isActive ? "find-spot__marker--active" : "",
-                spot.availableNow ? "find-spot__marker--available-now" : "",
-            ].filter(Boolean).join(" ");
+            const isMine = spot.imagePublicIds?.length > 0;
+
+            if (isMine) {
+                el.textContent = "🏠";
+                el.className = "find-spot__marker-home";
+            }
+            else
+                el.className = [
+                    "find-spot__marker",
+                    isActive ? "find-spot__marker--active" : "",
+                    spot.availableNow ? "find-spot__marker--available-now" : "",
+                ].filter(Boolean).join(" ");
 
             const marker = L.marker([spot.latitude, spot.longitude], {
-                icon: L.divIcon({ html: el, className: "", iconAnchor: [40, 16] }),
+                icon: L.divIcon({
+                    html: el,
+                    className: "",
+                    iconSize: isMine ? [10, 10] : [32, 32],
+                    iconAnchor: isMine ? [10, 10] : [16, 16],
+                }),
             });
 
             marker.on("click", (e) => {
@@ -310,12 +323,14 @@ function FindSpot() {
                     </button>
                 </Link>
 
-                <div className="find-spot__date-wrap">
+                <div className="find-spot__date-wrap" onClick={() => inputRef.current?.showPicker()}>
                     <Calendar size={14}/>
                     <input
+                        ref = {inputRef}
                         type="date"
                         className="find-spot__date-input"
                         value={filters.date}
+                        onKeyDown={(e) => e.preventDefault()}
                         min={today}
                         onChange={(e) => {
                             if (e.target.value < today) {
@@ -383,7 +398,8 @@ function FindSpot() {
                     <p className="find-spot__slot-panel-title">Selectează intervalele</p>
                     {allTimeSlots.map((slot) => {
                         const now = new Date().getHours();
-                        if (slot.startHour < now) return null;
+                        const nowDate = formatDate(new Date()) ;
+                        if (slot.startHour < now && nowDate == filters.date) return null;
                         return (
                             <div
                                 key={slot.id}

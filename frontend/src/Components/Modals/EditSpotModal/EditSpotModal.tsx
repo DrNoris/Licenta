@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useRef, useState} from "react";
 import { createPortal } from "react-dom";
 import { X, DollarSign, Camera, Trash2, Loader } from "lucide-react";
 import type {EditSpotFormState, EditSpotModalProps, ExistingPhoto} from "./EditSpotModal.types.ts";
@@ -18,6 +18,8 @@ function EditSpotModal({ isOpen, spot, onClose, onEdit }: EditSpotModalProps) {
         error: "",
         loading: false,
     });
+    const mouseDownTargetRef = useRef<EventTarget | null>(null);
+
 
     useBodyScrollLock(isOpen);
 
@@ -123,15 +125,21 @@ function EditSpotModal({ isOpen, spot, onClose, onEdit }: EditSpotModalProps) {
         }
     };
 
+    const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>): void => {
+        mouseDownTargetRef.current = e.target;
+    };
+
     const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>): void => {
-        if (e.target === e.currentTarget) onClose();
+        if (e.target === e.currentTarget && mouseDownTargetRef.current === e.currentTarget) {
+            onClose();
+        }
     };
 
     const isFormValid = form.description && form.pricePerHour;
     const remainingSlots = 5 - (form.existingPhotos.filter((p) => !p.markedForDeletion).length);
 
     return createPortal(
-        <div className="edit-spot-overlay" onClick={handleOverlayClick}>
+        <div className="edit-spot-overlay" onClick={handleOverlayClick} onMouseDown={handleMouseDown}>
             <div className="edit-spot-modal">
 
                 {/* ── Header ─────────────────────────────────────────── */}
