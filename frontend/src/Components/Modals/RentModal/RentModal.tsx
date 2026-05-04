@@ -73,8 +73,8 @@ function RentModal({ isOpen, onClose, spotId, spotDescription, onUpdateTimeSlots
     const allSlotsLoadedRef = useRef(false);
     const lastFetchedDateRef = useRef<string>("");
     const recurrenceRef = useRef<HTMLDivElement>(null);
-    const datePickerRef = useRef(null);
-    const endPickerRef = useRef(null);
+    const datePickerRef = useRef<HTMLInputElement>(null);
+    const endPickerRef = useRef<HTMLInputElement>(null);
 
     const hasAdditions = slotsToAdd.length > 0;
     const hasDeletions = slotsToDelete.length > 0;

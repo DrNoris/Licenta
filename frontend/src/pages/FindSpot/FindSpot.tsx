@@ -34,7 +34,7 @@ function FindSpot() {
     const mapRef = useRef<L.Map | null>(null);
     const markersLayerRef = useRef<L.LayerGroup | null>(null);
     const dateInputRef = useRef<HTMLInputElement>(null);
-    const inputRef = useRef(null);
+    const inputRef = useRef<HTMLInputElement>(null);
 
     const [spots, setSpots] = useState<ParkingSpot[]>([]);
     const [selectedSpot, setSelectedSpot] = useState<ParkingSpot | null>(null);
