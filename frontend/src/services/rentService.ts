@@ -11,7 +11,6 @@ function authHeaders(): HeadersInit {
     };
 }
 
-// ── All time slots — cached in localStorage ───────────────────
 export async function getAllTimeSlots(): Promise<TimeSlot[]> {
     const cached = localStorage.getItem(ALL_SLOTS_KEY);
     if (cached) {
@@ -58,7 +57,6 @@ export async function deleteParkingSpotSlot(parkingSpotId: string, selectedDates
     if (!res.ok) throw new Error("Adăugarea a eșuat.");
 }
 
-// ── Available slots for a spot on a given date ────────────────
 export async function manageSlots(
     spotId: string,
     date: string // "YYYY-MM-DD"
@@ -71,14 +69,12 @@ export async function manageSlots(
     return res.json();
 }
 
-// ── Format hour integer to HH:MM string ──────────────────────
 export function formatHour(hour: number): string {
     const h = Math.floor(hour);
     const m = Math.round((hour - h) * 60);
     return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
 }
 
-// ── Format date to YYYY-MM-DD ─────────────────────────────────
 export function formatDate(date: Date): string {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");

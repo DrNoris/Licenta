@@ -20,7 +20,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
 import java.util.Map;
 import java.util.UUID;
 

@@ -23,12 +23,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
 
     @Override
-    protected void doFilterInternal(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            FilterChain filterChain)
-            throws ServletException, IOException {
-
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String authHeader = request.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -39,9 +34,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         try {
 
             String token = authHeader.substring(7);
-
             Jws<Claims> claims = jwtService.validate(token);
-
             String userId = claims.getBody().getSubject();
 
             UsernamePasswordAuthenticationToken authentication =
@@ -55,7 +48,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     .setAuthentication(authentication);
 
         } catch (Exception e) {
-
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }

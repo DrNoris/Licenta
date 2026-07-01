@@ -34,6 +34,7 @@ public class ParkingSpotSlotController {
     @GetMapping("/{spotId}/availability")
     public ResponseEntity<AvailabilityResponse> getAvailability(@PathVariable String spotId, @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         AvailabilityResponse availabilityResponse = parkingSpotSlotService.getAvailability(UUID.fromString(spotId), date);
+
         return ResponseEntity.status(HttpStatus.OK).body(availabilityResponse);
     }
 

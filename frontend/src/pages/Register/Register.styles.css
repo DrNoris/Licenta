@@ -1,5 +1,3 @@
-/* ── Reuses the same structure as Login.css ──────────────────── */
-/* ── Page wrapper ────────────────────────────────────────────── */
 .register-page {
     min-height: 100vh;
     display: flex;
@@ -8,7 +6,6 @@
     overflow: hidden;
 }
 
-/* ── Fixed top header ────────────────────────────────────────── */
 .register-page__header {
     background-color: #ffffff;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -41,7 +38,6 @@
     object-fit: cover;
 }
 
-/* ── Content area ────────────────────────────────────────────── */
 .register-page__body {
     flex: 1;
     display: flex;
@@ -51,7 +47,6 @@
     padding-top: 6rem;
 }
 
-/* ── Card ────────────────────────────────────────────────────── */
 .register-card {
     width: 100%;
     max-width: 28rem;
@@ -68,7 +63,6 @@
     margin-bottom: 1.5rem;
 }
 
-/* ── Error / success messages ────────────────────────────────── */
 .register-card__error {
     color: #ef4444;
     text-align: center;
@@ -83,7 +77,6 @@
     font-size: 0.875rem;
 }
 
-/* ── Form fields ─────────────────────────────────────────────── */
 .register-card__field {
     margin-bottom: 1rem;
 }
@@ -117,7 +110,6 @@
     cursor: not-allowed;
 }
 
-/* ── Submit button ───────────────────────────────────────────── */
 .register-card__submit {
     width: 100%;
     padding: 0.5rem 1rem;
@@ -147,7 +139,6 @@
     cursor: not-allowed;
 }
 
-/* ── Login link ──────────────────────────────────────────────── */
 .register-card__footer {
     text-align: center;
     font-size: 0.875rem;

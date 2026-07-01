@@ -1,0 +1,123 @@
+@startuml
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 10
+skinparam sequenceBoxBorderColor #555555
+skinparam sequenceBoxBackgroundColor #F5F5F5
+
+actor "Stripe API" as Stripe
+
+box "Park a Lot" #EEF3FB
+    participant "BookingController" as CTRL
+    participant "BookingService" as SVC
+    participant "UserRepository" as UREPO
+    participant "ParkingSpotRepository" as SREPO
+    participant "WalletRepository" as WREPO
+    participant "BookingRepository" as BREPO
+    participant "WalletTransactionRepository" as WTREPO
+    participant "ParkingSpotSlotRepository" as SLREPO
+end box
+
+database "PostgreSQL" as DB
+
+== Precondiție: Plată procesată cu succes de Stripe ==
+
+Stripe -> CTRL: POST /api/bookings/webhook\nStripe-Signature: t=...,v1=...\n{type: "checkout.session.completed"}
+activate CTRL
+
+CTRL -> CTRL: payload = request.getInputStream()\nWebhook.constructEvent(\n  payload, sigHeader, webhookSecret)\nVerificare HMAC-SHA256
+
+alt Semnătură validă
+
+    CTRL -> CTRL: event.getType() ==\n"checkout.session.completed"\ndeserializer.deserializeUnsafe()
+
+    CTRL -> SVC: fulfillBooking(session)
+    activate SVC
+    note over SVC: @Transactional — toate\noperațiile sunt atomice
+
+    SVC -> SVC: metadata = session.getMetadata()\nspotId, userId, date,\ntimeSlotIds = metadata.get(...)
+
+    SVC -> UREPO: findById(userId)
+    activate UREPO
+    UREPO -> DB: SELECT * FROM users\nWHERE id = :userId
+    DB --> UREPO: User
+    UREPO --> SVC: User (client)
+    deactivate UREPO
+
+    SVC -> SREPO: findById(spotId)
+    activate SREPO
+    SREPO -> DB: SELECT * FROM parking_spots\nWHERE id = :spotId
+    DB --> SREPO: ParkingSpot {owner, pricePerHour}
+    SREPO --> SVC: ParkingSpot + Owner
+    deactivate SREPO
+
+    SVC -> SVC: totalPrice =\ntimeSlotIds.size() * pricePerHour
+
+    SVC -> WREPO: findByUser(owner)
+    activate WREPO
+    WREPO -> DB: SELECT * FROM wallets\nWHERE user_id = :ownerId
+    DB --> WREPO: result
+
+    alt Wallet există
+        WREPO --> SVC: Wallet {balance}
+        deactivate WREPO
+    else Wallet inexistent
+        WREPO --> SVC: empty
+        deactivate WREPO
+        SVC -> WREPO: save(Wallet {user: owner,\nbalance: 0})
+        activate WREPO
+        WREPO -> DB: INSERT INTO wallets
+        DB --> WREPO: Wallet nou creat
+        WREPO --> SVC: Wallet {balance: 0}
+        deactivate WREPO
+    end
+
+    SVC -> WREPO: wallet.balance += totalPrice\nsave(wallet)
+    activate WREPO
+    WREPO -> DB: UPDATE wallets\nSET balance = :newBalance
+    DB --> WREPO: ok
+    WREPO --> SVC: Wallet actualizat
+    deactivate WREPO
+
+    SVC -> BREPO: save(Booking {client,\ntotalPrice,\nstatus: CONFIRMED})
+    activate BREPO
+    BREPO -> DB: INSERT INTO bookings
+    DB --> BREPO: Booking {id}
+    BREPO --> SVC: Booking {id}
+    deactivate BREPO
+
+    SVC -> WTREPO: save(WalletTransaction {\nwallet, amount: totalPrice,\ntype: CREDIT,\ndescription: "Booking " + id,\ncreatedAt: now()})
+    activate WTREPO
+    WTREPO -> DB: INSERT INTO wallet_transactions
+    DB --> WTREPO: ok
+    WTREPO --> SVC: WalletTransaction
+    deactivate WTREPO
+
+    loop Pentru fiecare timeSlotId
+        SVC -> SLREPO: findByParkingSpotIdAnd\nTimeSlotIdAndDate(\nspotId, timeSlotId, date)
+        activate SLREPO
+        SLREPO -> DB: SELECT * FROM parking_spot_slots\nWHERE parking_spot_id = :spotId\nAND time_slot_id = :timeSlotId\nAND date = :date
+        DB --> SLREPO: ParkingSpotSlot
+        SLREPO --> SVC: ParkingSpotSlot
+        deactivate SLREPO
+
+        SVC -> SLREPO: slot.setBooking(booking)\nsave(slot)
+        activate SLREPO
+        SLREPO -> DB: UPDATE parking_spot_slots\nSET booking_id = :bookingId
+        DB --> SLREPO: ok
+        SLREPO --> SVC: slot actualizat
+        deactivate SLREPO
+    end
+
+    SVC --> CTRL: void
+    deactivate SVC
+
+    CTRL --> Stripe: 200 OK
+    deactivate CTRL
+
+else Semnătură invalidă
+    CTRL --> Stripe: 400 Bad Request
+    deactivate CTRL
+    note over CTRL: Cerere respinsă —\nposibil atac extern
+end
+
+@enduml

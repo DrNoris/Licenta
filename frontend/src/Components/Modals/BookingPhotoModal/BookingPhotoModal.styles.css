@@ -1,4 +1,3 @@
-/* ── Overlay ─────────────────────────────────────────────────── */
 .photos-overlay {
     position: fixed;
     inset: 0;
@@ -9,7 +8,6 @@
     justify-content: center;
 }
 
-/* ── Modal ───────────────────────────────────────────────────── */
 .photos-modal {
     position: relative;
     width: 100%;
@@ -22,7 +20,6 @@
     padding: 1rem;
 }
 
-/* ── Close button ────────────────────────────────────────────── */
 .photos-modal__close {
     position: absolute;
     top: 0;
@@ -44,7 +41,6 @@
     background: rgba(255,255,255,0.3);
 }
 
-/* ── Main image ──────────────────────────────────────────────── */
 .photos-modal__main {
     width: 100%;
     max-height: 70vh;
@@ -54,13 +50,11 @@
     user-select: none;
 }
 
-/* ── Counter ─────────────────────────────────────────────────── */
 .photos-modal__counter {
     font-size: 0.85rem;
     color: rgba(255,255,255,0.7);
 }
 
-/* ── Thumbnails ──────────────────────────────────────────────── */
 .photos-modal__thumbs {
     display: flex;
     gap: 0.5rem;
@@ -94,7 +88,6 @@
     opacity: 1;
 }
 
-/* ── Nav arrows ──────────────────────────────────────────────── */
 .photos-modal__nav {
     position: absolute;
     top: 50%;

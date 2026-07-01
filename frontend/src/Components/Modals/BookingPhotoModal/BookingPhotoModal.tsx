@@ -51,12 +51,10 @@ function BookingPhotoModal({ isOpen, onClose, booking }: BookingPhotosModalProps
         >
             <div className="photos-modal" onClick={(e) => e.stopPropagation()}>
 
-                {/* Close */}
                 <button className="photos-modal__close" onClick={onClose}>
                     <X size={18} />
                 </button>
 
-                {/* No images */}
                 {!loading && signedUrls.length === 0 && (
                     <div style={{ color: "#9ca3af", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem" }}>
                         <ImageOff size={40} />
@@ -64,7 +62,6 @@ function BookingPhotoModal({ isOpen, onClose, booking }: BookingPhotosModalProps
                     </div>
                 )}
 
-                {/* Main image */}
                 {!loading && signedUrls.length > 0 && (
                     <>
                         <img
@@ -74,12 +71,10 @@ function BookingPhotoModal({ isOpen, onClose, booking }: BookingPhotosModalProps
                             onClick={next}
                         />
 
-                        {/* Counter */}
                         <span className="photos-modal__counter">
                             {activeIndex + 1} / {signedUrls.length}
                         </span>
 
-                        {/* Thumbnails */}
                         {signedUrls.length > 1 && (
                             <div className="photos-modal__thumbs">
                                 {signedUrls.map((url, i) => (
@@ -94,7 +89,6 @@ function BookingPhotoModal({ isOpen, onClose, booking }: BookingPhotosModalProps
                             </div>
                         )}
 
-                        {/* Nav arrows */}
                         {signedUrls.length > 1 && (
                             <>
                                 <button className="photos-modal__nav photos-modal__nav--prev" onClick={prev}>

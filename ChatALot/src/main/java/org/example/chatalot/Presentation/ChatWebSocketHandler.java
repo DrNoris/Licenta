@@ -104,7 +104,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         try {
             URI uri = session.getUri();
             if (uri == null) return null;
-            String query = uri.getQuery(); // token=xxx
+            String query = uri.getQuery();
             if (query == null) return null;
             for (String param : query.split("&")) {
                 if (param.startsWith("token=")) {

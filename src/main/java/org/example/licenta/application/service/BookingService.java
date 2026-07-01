@@ -49,7 +49,6 @@ public class BookingService {
 
         long slotCount = request.getTimeSlotIds().size();
         long unitAmount = Math.round(spot.getPricePerHour() * 100);
-        long totalAmount = unitAmount * slotCount;
 
         SessionCreateParams params = SessionCreateParams.builder()
                 .setMode(SessionCreateParams.Mode.PAYMENT)

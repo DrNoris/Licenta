@@ -15,7 +15,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -27,12 +26,16 @@ public class ParkingSpotController {
 
     @GetMapping
     public ResponseEntity<List<ParkingSpotResponse>> getAllSpots() {
-        return ResponseEntity.ok(parkingSpotService.getAllSpots());
+        List<ParkingSpotResponse> response = parkingSpotService.getAllSpots();
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{spotId}")
     public ResponseEntity<ParkingSpotResponse> getSpotById(@PathVariable String spotId) {
-        return ResponseEntity.ok(parkingSpotService.getSpotById(UUID.fromString(spotId)));
+        ParkingSpotResponse response = parkingSpotService.getSpotById(UUID.fromString(spotId));
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{spotId}/owner")
@@ -45,9 +48,9 @@ public class ParkingSpotController {
     @GetMapping("/manage")
     public ResponseEntity<List<ParkingSpotResponse>> getMySpots(Authentication authentication) {
         UUID ownerId = UUID.fromString(authentication.getName());
-        List<ParkingSpotResponse> repsonse = parkingSpotService.getAllSpots(ownerId);
+        List<ParkingSpotResponse> response = parkingSpotService.getAllSpots(ownerId);
 
-        return ResponseEntity.ok(repsonse);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -106,10 +109,8 @@ public class ParkingSpotController {
             Authentication authentication
     ) {
         UUID currentUserId = authentication != null ? UUID.fromString(authentication.getName()) : null;
+        List<ParkingSpotResponse> response = parkingSpotService.search(swLat, swLng, neLat, neLng, date, timeSlotIds, minPricePerHour, maxPricePerHour, currentUserId);
 
-        return ResponseEntity.ok(
-                parkingSpotService.search(swLat, swLng, neLat, neLng,
-                        date, timeSlotIds, minPricePerHour, maxPricePerHour, currentUserId)
-        );
+        return ResponseEntity.ok(response);
     }
 }

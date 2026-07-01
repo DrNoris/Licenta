@@ -70,7 +70,6 @@ function CardSwitcher({
 
     return (
         <div className="card-switcher">
-            {/* Card — only the active one is rendered, AnimatePresence handles transitions */}
             <div className="card-switcher__stage">
                 <AnimatePresence mode="wait">
                     <motion.div
@@ -102,7 +101,6 @@ function CardSwitcher({
                 </AnimatePresence>
             </div>
 
-            {/* Navigation */}
             <div className="card-switcher__controls">
                 <button
                     className="card-switcher__btn"

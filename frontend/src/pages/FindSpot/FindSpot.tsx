@@ -56,7 +56,6 @@ function FindSpot() {
     const [mapReady, setMapReady] = useState(false);
     const [filtersChanged, setFiltersChanged] = useState(false);
 
-    // ── Initial bounds from URL — read once ──────────────────
     const initialBoundsRef = useRef({
         swLat: searchParams.get("swLat"),
         swLng: searchParams.get("swLng"),
@@ -65,7 +64,7 @@ function FindSpot() {
         zoom:  searchParams.get("zoom"),
     });
     const hasBoundsInUrl = Object.values(initialBoundsRef.current)
-        .filter((_, i) => i < 4) // doar swLat, swLng, neLat, neLng
+        .filter((_, i) => i < 4)
         .every(Boolean);
 
     const filtersRef = useRef<FindSpotFilters>(EMPTY_FILTERS);
@@ -73,7 +72,6 @@ function FindSpot() {
 
     const today = formatDate(new Date());
 
-    // ── Fetch available slots for selected spot ───────────────
     useEffect(() => {
         if (!selectedSpot || !filters.date) {
             setAvailableSlots([]);
@@ -84,7 +82,6 @@ function FindSpot() {
             .catch(() => setAvailableSlots([]));
     }, [selectedSpot, filters.date]);
 
-    // ── Init map ──────────────────────────────────────────────
     useEffect(() => {
         if (!mapContainerRef.current || mapRef.current) return;
 
@@ -151,12 +148,10 @@ function FindSpot() {
         };
     }, []);
 
-    // ── Load all time slots ───────────────────────────────────
     useEffect(() => {
         getAllTimeSlots().then(setAllTimeSlots).catch(() => {});
     }, []);
 
-    // ── Render markers ────────────────────────────────────────
     useEffect(() => {
         if (!markersLayerRef.current) return;
         markersLayerRef.current.clearLayers();
@@ -196,7 +191,6 @@ function FindSpot() {
         });
     }, [spots, selectedSpot]);
 
-    // ── Auto-search from URL params on mount ─────────────────
     useEffect(() => {
         if (!mapReady || !hasBoundsInUrl || !filters.date) return;
 
@@ -215,7 +209,6 @@ function FindSpot() {
 
     }, [mapReady, filters.date]);
 
-    // ── Trigger search ────────────────────────────────────────
     const triggerSearch = async (map?: L.Map) => {
         setFiltersChanged(false);
         const m = map ?? mapRef.current;
@@ -266,7 +259,6 @@ function FindSpot() {
         }
     };
 
-    // ── Toggle time slot filter ───────────────────────────────
     const toggleSlot = (id: string) => {
         setFilters((prev) => ({
             ...prev,
@@ -312,7 +304,6 @@ function FindSpot() {
 
     return (
         <div className="find-spot">
-            {/* ── Filter bar ── */}
             <div className="find-spot__filters">
                 <Link to="/">
                     <button
@@ -392,7 +383,6 @@ function FindSpot() {
                 )}
             </div>
 
-            {/* ── Time slot panel ── */}
             {showSlotPanel && (
                 <div className="find-spot__slot-panel">
                     <p className="find-spot__slot-panel-title">Selectează intervalele</p>
@@ -414,10 +404,8 @@ function FindSpot() {
                 </div>
             )}
 
-            {/* ── Map ── */}
             <div ref={mapContainerRef} className="find-spot__map"/>
 
-            {/* ── Empty hint ── */}
             {!filters.date && (
                 <div className="find-spot__hint">
                     <ParkingSquare size={32} strokeWidth={1.5}/>
@@ -425,7 +413,6 @@ function FindSpot() {
                 </div>
             )}
 
-            {/* ── No results ── */}
             {hasSearched && spots.length === 0 && !searching && !mapMoved && !filtersChanged && (
                 <div className="find-spot__hint find-spot__hint--no-results">
                     <ParkingSquare size={32} strokeWidth={1.5}/>
@@ -433,7 +420,6 @@ function FindSpot() {
                 </div>
             )}
 
-            {/* ── Search button ── */}
             {(mapMoved || filtersChanged) && filters.date && (
                 <button
                     className="find-spot__search-btn"
@@ -445,7 +431,6 @@ function FindSpot() {
                 </button>
             )}
 
-            {/* ── Spot popup ── */}
             {selectedSpot && (
                 <AuthGuard children={
                     <SpotPopup

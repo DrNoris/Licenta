@@ -13,8 +13,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
-    List<Booking> findByClientId(UUID clientId);
-
     @Query("""
     SELECT b FROM Booking b
     JOIN b.reservedSlots s

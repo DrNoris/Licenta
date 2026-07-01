@@ -157,7 +157,6 @@ public class ParkingSpotService {
         boolean hasPaid = bookingService.hasActiveBooking(spotId, requesterId);
 
         if (!isOwner  && !hasPaid) {
-            //dau 403 sau pot da niste poze placeholder ca sa imi fie mai scalabil codul
             throw new AccessDeniedException("You do not have permission to see these imagines");
         }
 

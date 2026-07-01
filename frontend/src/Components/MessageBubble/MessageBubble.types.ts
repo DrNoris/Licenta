@@ -4,10 +4,3 @@ export interface MessageBubbleProps {
     message: ChatMessage;
     isOwn: boolean;
 }
-
-export interface MessageThreadState {
-    messages: ChatMessage[];
-    loading: boolean;
-    sending: boolean;
-    error: string;
-}

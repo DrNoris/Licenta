@@ -1,5 +1,3 @@
-import type {Conversation} from "../../Components/ConversationItem/ConversationItem.types.ts";
-
 export interface ChatMessage {
     id: string;
     conversationId: string;
@@ -8,10 +6,4 @@ export interface ChatMessage {
     content: string;
     sentAt: string;
     readAt: string | null;
-}
-
-export interface ChatPageState {
-    conversations: Conversation[];
-    loading: boolean;
-    error: string;
 }

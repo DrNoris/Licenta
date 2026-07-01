@@ -29,9 +29,13 @@ export function parseToken<T = Record<string, unknown>>(token: string): T | null
 
 //region Expiry check
 export function isTokenValid(token: string | null): boolean {
-    if (!token) return false;
+    if (!token)
+        return false;
     const payload = parseToken<{ exp: number }>(token);
-    if (!payload?.exp) return false;
+
+    if (!payload?.exp)
+        return false;
+
     return payload.exp > Math.floor(Date.now() / 1000);
 }
 
@@ -47,7 +51,7 @@ export function logout(): void {
 
 //region Login
 export async function loginRequest(credentials: LoginCredentials): Promise<void> {
-    const res = await fetch(`${API_BASE}/api/auth/login`, {
+    const res: Response = await fetch(`${API_BASE}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(credentials),
@@ -65,7 +69,7 @@ export async function loginRequest(credentials: LoginCredentials): Promise<void>
 
 //region Register
 export async function registerRequest(credentials: import("../pages/Register/Register.types.ts").RegisterCredentials): Promise<void> {
-    const res = await fetch(`${API_BASE}/api/auth/register`, {
+    const res: Response = await fetch(`${API_BASE}/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(credentials),
@@ -80,7 +84,7 @@ export async function registerRequest(credentials: import("../pages/Register/Reg
 
 //region Activate account
 export async function activateRequest(token: string): Promise<string> {
-    const res = await fetch(`${API_BASE}/api/auth/verify?token=${encodeURIComponent(token)}`, {
+    const res: Response = await fetch(`${API_BASE}/api/auth/verify?token=${encodeURIComponent(token)}`, {
         method: "GET",
     });
 
@@ -89,7 +93,6 @@ export async function activateRequest(token: string): Promise<string> {
         throw new Error(body?.message ?? "Activarea a eșuat. Token invalid sau expirat.");
     }
 
-    // Backend returns a fresh JWT so the user is logged in right away
     const { token: jwt } = await res.json();
     saveToken(jwt);
     return jwt;

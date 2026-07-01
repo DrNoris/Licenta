@@ -27,19 +27,14 @@ public class ChatController {
     private final JwtService jwtService;
 
     @GetMapping("/conversations")
-    public ResponseEntity<List<ConversationResponse>> getConversations(
-            Authentication authentication
-    ) {
+    public ResponseEntity<List<ConversationResponse>> getConversations(Authentication authentication) {
         UUID userId = UUID.fromString(authentication.getName());
+
         return ResponseEntity.ok(chatService.getConversations(userId));
     }
 
     @PostMapping("/conversations")
-    public ResponseEntity<ConversationResponse> getOrCreate(
-            @RequestBody CreateConversationRequest req,
-            Authentication authentication,
-            HttpServletRequest request
-    ) {
+    public ResponseEntity<ConversationResponse> getOrCreate(@RequestBody CreateConversationRequest req, Authentication authentication, HttpServletRequest request) {
         UUID requesterId = UUID.fromString(authentication.getName());
         String token = request.getHeader("Authorization").substring(7);
         String requesterName = jwtService.extractUserName(token);
@@ -48,25 +43,16 @@ public class ChatController {
     }
 
     @GetMapping("/conversations/{id}/messages")
-    public ResponseEntity<Page<MessageResponse>> getMessages(
-            @PathVariable UUID id,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "30") int size,
-            Authentication authentication
-    ) {
+    public ResponseEntity<Page<MessageResponse>> getMessages(@PathVariable UUID id, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "30") int size, Authentication authentication) {
         UUID userId = UUID.fromString(authentication.getName());
-        return ResponseEntity.ok(
-                chatService.getMessages(id, userId,
-                        PageRequest.of(page, size, Sort.by("sentAt").descending()))
-        );
+
+        return ResponseEntity.ok(chatService.getMessages(id, userId, PageRequest.of(page, size, Sort.by("sentAt").descending())));
     }
 
     @PostMapping("/conversations/{id}/read")
-    public ResponseEntity<Void> markAsRead(
-            @PathVariable UUID id,
-            Authentication authentication
-    ) {
+    public ResponseEntity<Void> markAsRead(@PathVariable UUID id, Authentication authentication) {
         chatService.markAsRead(id, UUID.fromString(authentication.getName()));
+
         return ResponseEntity.ok().build();
     }
 

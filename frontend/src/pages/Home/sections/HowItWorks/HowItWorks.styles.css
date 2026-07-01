@@ -1,24 +1,20 @@
-/* ── Section wrapper ─────────────────────────────────────────── */
 .how-it-works {
     padding: 4rem 0;
     background-color: #ffffff;
 }
 
-/* ── Inner container ─────────────────────────────────────────── */
 .how-it-works__container {
     width: 75%;
     margin: 0 auto;
     text-align: center;
 }
 
-/* ── Heading ─────────────────────────────────────────────────── */
 .how-it-works__heading {
     font-size: 1.875rem;
     font-weight: 700;
     margin-bottom: 1.5rem;
 }
 
-/* ── Grid ────────────────────────────────────────────────────── */
 .how-it-works__grid {
     display: grid;
     grid-template-columns: 1fr;
@@ -37,7 +33,6 @@
     }
 }
 
-/* ── Card ────────────────────────────────────────────────────── */
 .how-it-works__card {
     background-color: #ffffff;
     padding: 1.5rem;

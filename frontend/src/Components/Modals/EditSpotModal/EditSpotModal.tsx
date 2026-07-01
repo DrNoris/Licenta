@@ -23,7 +23,6 @@ function EditSpotModal({ isOpen, spot, onClose, onEdit }: EditSpotModalProps) {
 
     useBodyScrollLock(isOpen);
 
-    // ── Fetch signed URLs for existing photos on open ─────────
     useEffect(() => {
         if (!isOpen) return;
 
@@ -156,7 +155,6 @@ function EditSpotModal({ isOpen, spot, onClose, onEdit }: EditSpotModalProps) {
                 <form onSubmit={handleSubmit} noValidate style={{ display: "contents" }}>
                     <div className="edit-spot-modal__body">
 
-                        {/* Section: Details */}
                         <div>
                             <p className="edit-spot-modal__section-label">Detalii</p>
                             <div className="edit-spot-modal__field">
@@ -176,7 +174,6 @@ function EditSpotModal({ isOpen, spot, onClose, onEdit }: EditSpotModalProps) {
 
                         <hr className="edit-spot-modal__divider" />
 
-                        {/* Section: Prices */}
                         <div>
                             <p className="edit-spot-modal__section-label">
                                 <DollarSign size={13} style={{ display: "inline", marginRight: "0.3rem" }} />
@@ -202,14 +199,12 @@ function EditSpotModal({ isOpen, spot, onClose, onEdit }: EditSpotModalProps) {
 
                         <hr className="edit-spot-modal__divider" />
 
-                        {/* Section: Photos */}
                         <div>
                             <p className="edit-spot-modal__section-label">
                                 <Camera size={13} style={{ display: "inline", marginRight: "0.3rem" }} />
                                 Fotografii
                             </p>
 
-                            {/* Existing photos */}
                             {form.photosLoading && (
                                 <div className="edit-spot-modal__photos-loading">
                                     <Loader size={18} className="edit-spot-modal__spinner" />
@@ -253,7 +248,6 @@ function EditSpotModal({ isOpen, spot, onClose, onEdit }: EditSpotModalProps) {
                                 </>
                             )}
 
-                            {/* New photos */}
                             {remainingSlots > 0 && (
                                 <div style={{ marginTop: form.existingPhotos.length > 0 ? "0.75rem" : "0" }}>
                                     <p className="edit-spot-modal__hint">
@@ -274,7 +268,6 @@ function EditSpotModal({ isOpen, spot, onClose, onEdit }: EditSpotModalProps) {
                         )}
                     </div>
 
-                    {/* ── Footer ─────────────────────────────────────────── */}
                     <div className="edit-spot-modal__footer">
                         <span className="edit-spot-modal__footer-info">* câmpuri obligatorii</span>
                         <div className="edit-spot-modal__footer-actions">

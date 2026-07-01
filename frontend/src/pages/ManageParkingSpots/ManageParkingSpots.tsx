@@ -18,7 +18,6 @@ function ManageParkingSpots() {
 
     const [addSpotModalOpen, setAddSpotModalOpen] = useState(false);
 
-    // ── Fetch on mount ──────────────────────────────────────────
     useEffect(() => {
         getMyParkingSpots()
             .then((spots) => setState({ spots, status: "idle", error: "" }))
@@ -28,7 +27,6 @@ function ManageParkingSpots() {
             });
     }, []);
 
-    // ── Delete ──────────────────────────────────────────────────
     const handleDelete = async (spotId: string): Promise<void> => {
         try {
             await deleteParkingSpot(spotId);
@@ -60,7 +58,6 @@ function ManageParkingSpots() {
         }
     };
 
-    // ── Add ─────────────────────────────────────────────────────
     const handleAdd = (spot: ParkingSpot): void => {
         setState((prev) => ({ ...prev, spots: [spot, ...prev.spots] }));
     };
@@ -88,7 +85,6 @@ function ManageParkingSpots() {
         <div className="manage-page">
             <div className="manage-page__container">
 
-                {/* Page header */}
                 <div className="manage-page__header">
                     <div>
                         <h1 className="manage-page__title">Locurile mele de parcare</h1>
@@ -104,7 +100,6 @@ function ManageParkingSpots() {
                     </button>
                 </div>
 
-                {/* Loading */}
                 {state.status === "loading" && (
                     <div className="manage-page__loading">
                         <div className="manage-page__spinner" />
@@ -112,14 +107,12 @@ function ManageParkingSpots() {
                     </div>
                 )}
 
-                {/* Error */}
                 {state.status === "error" && (
                     <div className="manage-page__error">
                         <p>{state.error}</p>
                     </div>
                 )}
 
-                {/* Empty */}
                 {state.status === "idle" && state.spots.length === 0 && (
                     <div className="manage-page__empty">
                         <ParkingSquare size={48} strokeWidth={1.5} />
@@ -131,7 +124,6 @@ function ManageParkingSpots() {
                     </div>
                 )}
 
-                {/* Grid */}
                 {state.status === "idle" && state.spots.length > 0 && (
                     <div className="manage-page__grid">
                         {state.spots.map((spot) => (
@@ -142,7 +134,6 @@ function ManageParkingSpots() {
 
             </div>
 
-            {/* Add modal */}
             <AddSpotModal
                 open={addSpotModalOpen}
                 onClose={() => setAddSpotModalOpen(false)}

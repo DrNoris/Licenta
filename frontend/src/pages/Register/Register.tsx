@@ -43,7 +43,6 @@ export default function Register() {
 
     return (
         <div className="register-page">
-            {/* Fixed header */}
             <header className="register-page__header">
                 <div className="register-page__header-inner">
                     <Link to="/" className="register-page__logo">
@@ -52,7 +51,6 @@ export default function Register() {
                 </div>
             </header>
 
-            {/* Centered card */}
             <div className="register-page__body">
                 <div className="register-card">
                     <h2 className="register-card__title">Înregistrare</h2>

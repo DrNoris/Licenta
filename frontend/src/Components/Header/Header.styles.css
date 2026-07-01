@@ -1,4 +1,3 @@
-/* ── Header wrapper ─────────────────────────────────────────── */
 .header {
     background-color: #ffffff;
     color: white;
@@ -20,7 +19,6 @@
     }
 }
 
-/* ── Logo ────────────────────────────────────────────────────── */
 .header__logo {
     display: flex;
     align-items: center;
@@ -34,7 +32,6 @@
     object-fit: cover;
 }
 
-/* ── Desktop nav ─────────────────────────────────────────────── */
 .header__nav-desktop {
     display: none;
     align-items: center;
@@ -59,7 +56,6 @@
     margin-left: 2.5rem;
 }
 
-/* ── Buttons ─────────────────────────────────────────────────── */
 .btn-primary {
     background-color: #1e40af;
     color: white;
@@ -95,7 +91,6 @@
     border-color: transparent;
 }
 
-/* ── Burger button ───────────────────────────────────────────── */
 .header__burger {
     display: flex;
     background: none;
@@ -110,7 +105,6 @@
     }
 }
 
-/* ── Mobile nav ──────────────────────────────────────────────── */
 .header__nav-mobile {
     display: flex;
     flex-direction: column;

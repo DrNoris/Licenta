@@ -1,5 +1,4 @@
 import { useState } from "react";
-import "./BookingsPage.styles.css";
 import Header from "../../../Components/Header/Header.tsx";
 import type {BookingTab} from "./BookingsPage.types.ts";
 import "./BookingsPage.styles.css"

@@ -13,10 +13,6 @@ public interface ConversationRepository extends JpaRepository<Conversation, UUID
             UUID buyerId, UUID sellerId
     );
 
-    Optional<Conversation> findByParkingSpotIdAndBuyerId(
-            UUID parkingSpotId, UUID buyerId
-    );
-
     Optional<Conversation> findByParkingSpotIdAndBuyerIdOrParkingSpotIdAndSellerId(
             UUID spotId1, UUID buyerId,
             UUID spotId2, UUID sellerId

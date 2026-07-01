@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Clock, MapPin } from "lucide-react";
 import type { SpotPopupProps } from "./SpotPopup.types.ts";
-import type { TimeSlot } from "../../Components/Modals/RentModal/RentModal.types.ts";
+import type { TimeSlot } from "../Modals/RentModal/RentModal.types.ts";
 import { formatHour } from "../../services/rentService.ts";
 import "./SpotPopup.styles.css";
 
@@ -23,7 +23,6 @@ function SpotPopup({ spot, date, availableSlots, onBook }: SpotPopupProps) {
         <div className="spot-popup">
             <div className="spot-popup__body">
 
-                {/* Header */}
                 <div className="spot-popup__header">
                     <div>
                         <p className="spot-popup__description">{spot.description}</p>
@@ -34,7 +33,6 @@ function SpotPopup({ spot, date, availableSlots, onBook }: SpotPopupProps) {
                     </div>
                 </div>
 
-                {/* Prices */}
                     <div className="spot-popup__price">
                         <span className="spot-popup__price-label">/ oră</span>
                         <span className="spot-popup__price-value">{spot.pricePerHour.toFixed(2)} lei</span>
@@ -48,7 +46,6 @@ function SpotPopup({ spot, date, availableSlots, onBook }: SpotPopupProps) {
                     />
                 )}
 
-                {/* Available slots — horizontal scrollable, selectable */}
                 <div className="spot-popup__slots">
                     <p className="spot-popup__slots-label">
                         <Clock size={12} />
@@ -74,7 +71,6 @@ function SpotPopup({ spot, date, availableSlots, onBook }: SpotPopupProps) {
                     )}
                 </div>
 
-                {/* Book button */}
                 {!spot.imagePublicIds && (
                     <button
                         className="spot-popup__btn-book"

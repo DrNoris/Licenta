@@ -42,9 +42,6 @@ function ChatThread({ conversation }: ChatThreadProps) {
     const payload = token ? parseToken<{ sub: string }>(token) : null;
     const currentUserId = payload?.sub ?? "";
 
-    /* ══════════════════════════════════════════════════════════
-       FETCH FIRST PAGE
-    ══════════════════════════════════════════════════════════ */
     useEffect(() => {
         initialLoadDoneRef.current = false;
         // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -173,7 +170,6 @@ function ChatThread({ conversation }: ChatThreadProps) {
                         return [...prev, msg];
                     });
                 } catch {
-                    /* empty */
                 }
             };
 
@@ -251,10 +247,8 @@ function ChatThread({ conversation }: ChatThreadProps) {
 
     return (
         <div className="chat-thread">
-            {/* ── Messages ── */}
             <div className="chat-thread__messages" ref={messagesContainerRef}>
                 <div className="chat-thread__messages-inner">
-                    {/* Sentinel — triggers older page load */}
                     <div
                         ref={sentinelRef}
                         className="chat-thread__sentinel"
@@ -305,7 +299,6 @@ function ChatThread({ conversation }: ChatThreadProps) {
                 </div>
             </div>
 
-            {/* ── Input ── */}
             <div className="chat-thread__input-area">
                 <div className="chat-thread__input-wrapper">
                     <textarea

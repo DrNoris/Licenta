@@ -1,0 +1,101 @@
+@startuml
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 10
+skinparam sequenceBoxBorderColor #555555
+skinparam sequenceBoxBackgroundColor #F5F5F5
+skinparam sequenceFontSize 14
+skinparam sequenceParticipantFontSize 14
+skinparam sequenceArrowFontSize 13
+skinparam noteFontSize 13
+
+actor "Utilizator\n(Owner)" as User
+
+box "Park a Lot" #EEF3FB
+    participant "Browser\n(React)" as FE
+    participant "ParkingSpotController" as CTRL
+    participant "ParkingSpotService" as SVC
+    participant "CloudinaryService" as CSVC
+    participant "ParkingSpotRepository" as SREPO
+end box
+
+actor "Cloudinary" as Cloudinary
+database "PostgreSQL" as DB
+actor "Redis" as Redis
+
+== Precondiție: Utilizator autentificat, loc de parcare existent ==
+
+User -> FE: Modifică descrierea, prețul\nsau fotografiile și salvează
+activate FE
+
+FE -> CTRL: PATCH /api/parking-spot/{spotId}\nContent-Type: multipart/form-data\n{data: {description, pricePerHour,\npublicIdsToDelete: [...]},\nimages: [fileNou1, ...]}\nAuthorization: Bearer <JWT>
+activate CTRL
+
+CTRL -> CTRL: ownerId =\nUUID.fromString(\nauthentication.getName())
+
+CTRL -> SVC: updateParkingSpot(\nrequest, images, ownerId, spotId)
+activate SVC
+
+SVC -> SREPO: findById(spotId)
+activate SREPO
+SREPO -> DB: SELECT * FROM parking_spots\nWHERE id = :spotId
+DB --> SREPO: ParkingSpot
+SREPO --> SVC: ParkingSpot
+deactivate SREPO
+
+alt Spot negăsit
+    SVC --> CTRL: NoSuchElementException
+    CTRL --> FE: 404 Not Found
+    FE -> User: Afișează eroare
+end
+
+alt Owner diferit
+    SVC --> CTRL: AccessDeniedException
+    CTRL --> FE: 403 Forbidden
+    FE -> User: Afișează eroare\n"Acces interzis"
+end
+
+SVC -> SVC: spot.setDescription(...)\nspot.setPricePerHour(...)
+
+loop Pentru fiecare publicId de șters
+    SVC -> CSVC: deleteImage(publicId)
+    activate CSVC
+    CSVC -> Redis: DELETE "signed_url:{publicId}"
+    Redis --> CSVC: ok
+    CSVC -> Cloudinary: destroy(publicId,\n{type: "authenticated",\ninvalidate: true})
+    activate Cloudinary
+    Cloudinary --> CSVC: ok
+    deactivate Cloudinary
+    CSVC --> SVC: ok
+    deactivate CSVC
+    SVC -> SVC: spot.getImages()\n.removeIf(img ->\npublicIdsToDelete\n.contains(img.getPublicId()))
+end
+
+loop Pentru fiecare imagine nouă
+    SVC -> CSVC: uploadPrivate(file,\n"parking-spots/{spotId}")
+    activate CSVC
+    CSVC -> Cloudinary: upload(bytes,\n{type: "authenticated"})
+    activate Cloudinary
+    Cloudinary --> CSVC: {public_id}
+    deactivate Cloudinary
+    CSVC --> SVC: publicId
+    deactivate CSVC
+    SVC -> SVC: spot.getImages().add(\nnew ParkingSpotImage\n{publicId, spot})
+end
+
+SVC -> SREPO: save(spot)
+activate SREPO
+SREPO -> DB: UPDATE parking_spots\n+ INSERT/DELETE\nparking_spot_images
+DB --> SREPO: ParkingSpot actualizat
+SREPO --> SVC: ParkingSpot
+deactivate SREPO
+
+SVC --> CTRL: ParkingSpotResponse
+deactivate SVC
+
+CTRL --> FE: 202 Accepted\n{ParkingSpotResponse}
+deactivate CTRL
+
+FE -> User: Afișează locul\nactualizat în grilă
+deactivate FE
+
+@enduml

@@ -7,11 +7,7 @@ import "./PhotoUploader.styles.css";
 
 const ACCEPTED = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/heic", "image/heif"];
 
-async function getCroppedFile(
-    imageSrc: string,
-    crop: Area,
-    fileName: string
-): Promise<File> {
+async function getCroppedFile(imageSrc: string, crop: Area, fileName: string): Promise<File> {
     const image = new Image();
     image.src = imageSrc;
     await new Promise((res) => (image.onload = res));
@@ -157,7 +153,6 @@ function PhotoUploader({ files, onChange, disabled = false, maxFiles = 5 }: Phot
                 </div>
             )}
 
-            {/* ── Crop Modal ── */}
             {cropSrc && (
                 <div className="photo-uploader__crop-overlay">
                     <div className="photo-uploader__crop-modal">

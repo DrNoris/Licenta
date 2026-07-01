@@ -39,7 +39,6 @@ export default function Activate() {
 
     return (
         <div className="activate-page">
-            {/* Fixed header */}
             <header className="activate-page__header">
                 <div className="activate-page__header-inner">
                     <Link to="/" className="activate-page__logo">
@@ -48,11 +47,9 @@ export default function Activate() {
                 </div>
             </header>
 
-            {/* Centered card */}
             <div className="activate-page__body">
                 <div className={`activate-card activate-card--${state.status}`}>
 
-                    {/* Loading */}
                     {state.status === "loading" && (
                         <>
                             <div className="activate-card__spinner" />
@@ -61,7 +58,6 @@ export default function Activate() {
                         </>
                     )}
 
-                    {/* Success */}
                     {state.status === "success" && (
                         <>
                             <svg className="activate-card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -73,7 +69,6 @@ export default function Activate() {
                         </>
                     )}
 
-                    {/* Error */}
                     {state.status === "error" && (
                         <>
                             <svg className="activate-card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

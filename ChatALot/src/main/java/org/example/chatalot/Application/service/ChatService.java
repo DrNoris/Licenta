@@ -49,11 +49,7 @@ public class ChatService {
     }
 
     @Transactional
-    public ConversationResponse getOrCreateConversation(
-            CreateConversationRequest request,
-            UUID requesterId,
-            String requesterName
-    ) {
+    public ConversationResponse getOrCreateConversation(CreateConversationRequest request, UUID requesterId, String requesterName) {
         return conversationRepository
                 .findByParkingSpotIdAndBuyerIdOrParkingSpotIdAndSellerId(
                         request.getParkingSpotId(), requesterId,

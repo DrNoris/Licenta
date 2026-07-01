@@ -38,7 +38,9 @@ public class RedisConfig {
         RedisSerializer<Object> serializer = new RedisSerializer<>() {
             @Override
             public byte[] serialize(Object value) {
-                if (value == null) return new byte[0];
+                if (value == null)
+                    return new byte[0];
+
                 try {
                     return redisObjectMapper.writeValueAsBytes(value);
                 } catch (Exception e) {
@@ -48,7 +50,9 @@ public class RedisConfig {
 
             @Override
             public Object deserialize(byte[] bytes) {
-                if (bytes == null || bytes.length == 0) return null;
+                if (bytes == null || bytes.length == 0)
+                    return null;
+
                 try {
                     return redisObjectMapper.readValue(bytes, Object.class);
                 } catch (Exception e) {

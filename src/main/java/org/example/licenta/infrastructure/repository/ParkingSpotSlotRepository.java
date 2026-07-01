@@ -12,17 +12,10 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface ParkingSpotSlotRepository extends JpaRepository<ParkingSpotSlot, UUID> {
-
-    boolean existsByParkingSpotIdAndTimeSlotIdAndDate(UUID spotId, UUID timeSlotId, LocalDate date);
-
     @EntityGraph(attributePaths = {"timeSlot"})
     List<ParkingSpotSlot> findByParkingSpotIdAndDateAndBookingIsNull(UUID spotId, LocalDate date);
 
     List<ParkingSpotSlot> findByParkingSpotIdAndDate(UUID spotId, LocalDate date);
-
-    List<ParkingSpotSlot> findByParkingSpotId(UUID spotId);
-
-    void deleteByParkingSpotIdAndDateAndBookingIsNull(UUID spotId, LocalDate date);
 
     Optional<ParkingSpotSlot> findByParkingSpotIdAndTimeSlotIdAndDate(UUID spotId, UUID timeSlotId, LocalDate date);
 

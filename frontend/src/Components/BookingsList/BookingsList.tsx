@@ -62,13 +62,10 @@ function BookingsList({ tab }: BookingsListProps) {
         setPhotosModalOpen(true);
     };
 
-    const emptyMessage = tab === "upcoming"
-        ? "Nu ai rezervări viitoare."
-        : "Nu ai rezervări arhivate.";
+    const emptyMessage = tab === "upcoming" ? "Nu ai rezervări viitoare." : "Nu ai rezervări arhivate.";
 
     return (
         <>
-            {/* Loading */}
             {loading && (
                 <div className="bookings-page__loading">
                     <div className="bookings-page__spinner" />
@@ -76,7 +73,6 @@ function BookingsList({ tab }: BookingsListProps) {
                 </div>
             )}
 
-            {/* Empty */}
             {!loading && groups.length === 0 && (
                 <div className="bookings-page__empty">
                     <CalendarX2 size={40} strokeWidth={1.5} />
@@ -84,7 +80,6 @@ function BookingsList({ tab }: BookingsListProps) {
                 </div>
             )}
 
-            {/* Grouped by date */}
             {!loading && groups.map((group) => (
                 <div key={group.date} className="bookings-page__group">
                     <p className="bookings-page__date-label">
@@ -103,7 +98,6 @@ function BookingsList({ tab }: BookingsListProps) {
                 </div>
             ))}
 
-            {/* Pagination */}
             {!loading && totalPages > 1 && (
                 <div className="bookings-page__pagination">
                     <button
@@ -132,7 +126,6 @@ function BookingsList({ tab }: BookingsListProps) {
                 </div>
             )}
 
-            {/* Photos modal */}
             <BookingPhotoModal
                 isOpen={photosModalOpen}
                 onClose={() => setPhotosModalOpen(false)}

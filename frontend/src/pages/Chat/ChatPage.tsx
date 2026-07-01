@@ -61,7 +61,6 @@ function ChatPage() {
             <Header />
 
             <div className="chat-page__body">
-                {/* ── Sidebar ── */}
                 <aside
                     className={`chat-sidebar ${
                         sidebarOpen ? "" : "chat-sidebar--collapsed"
@@ -96,9 +95,7 @@ function ChatPage() {
                     </div>
                 </aside>
 
-                {/* ── Main area ── */}
                 <main className="chat-main">
-                    {/* Top bar */}
                     <div className="chat-main__topbar">
                         <button
                             className="chat-main__toggle"
@@ -119,7 +116,6 @@ function ChatPage() {
                         )}
                     </div>
 
-                    {/* Thread or empty state */}
                     {selectedConversation ? (
                         <ChatThread
                             conversation={selectedConversation}

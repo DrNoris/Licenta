@@ -1,0 +1,100 @@
+@startuml
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 10
+skinparam sequenceBoxBorderColor #555555
+skinparam sequenceBoxBackgroundColor #F5F5F5
+skinparam sequenceFontSize 14
+skinparam sequenceParticipantFontSize 14
+skinparam sequenceArrowFontSize 13
+skinparam noteFontSize 13
+
+actor "Utilizator\n(Owner)" as User
+
+box "Park a Lot" #EEF3FB
+    participant "Browser\n(React)" as FE
+    participant "ParkingSpotController" as CTRL
+    participant "ParkingSpotService" as SVC
+    participant "CloudinaryService" as CSVC
+    participant "UserRepository" as UREPO
+    participant "ParkingSpotRepository" as SREPO
+end box
+
+actor "Cloudinary" as Cloudinary
+database "PostgreSQL" as DB
+
+== Precondiție: Utilizator autentificat ==
+note over User, FE: JWT valid prezent în headers
+
+User -> FE: Completează formularul\n(descriere, preț, locație)\nși atașează imagini
+activate FE
+
+FE -> CTRL: POST /api/parking-spot\nContent-Type: multipart/form-data\n{data: {description, pricePerHour,\nlatitude, longitude, address},\nimages: [file1, file2, ...]}\nAuthorization: Bearer <JWT>
+activate CTRL
+
+CTRL -> CTRL: ownerId =\nUUID.fromString(\nauthentication.getName())
+
+CTRL -> SVC: createParkingSpot(\nrequest, images, ownerId)
+activate SVC
+
+SVC -> UREPO: findById(ownerId)
+activate UREPO
+UREPO -> DB: SELECT * FROM users\nWHERE id = :ownerId
+DB --> UREPO: User
+UREPO --> SVC: User (owner)
+deactivate UREPO
+
+alt User negăsit
+    SVC --> CTRL: NoSuchElementException
+    CTRL --> FE: 404 Not Found
+    FE -> User: Afișează eroare
+end
+
+SVC -> SVC: spot = parkingSpotMapper\n.toEntity(request, owner)
+
+SVC -> SREPO: save(spot)
+activate SREPO
+SREPO -> DB: INSERT INTO parking_spots\n{description, pricePerHour,\nlatitude, longitude,\naddress, owner_id}
+DB --> SREPO: ParkingSpot {id}
+SREPO --> SVC: ParkingSpot {id}
+deactivate SREPO
+
+loop Pentru fiecare imagine
+    SVC -> CSVC: uploadPrivate(file,\n"parking-spots/{spotId}")
+    activate CSVC
+    CSVC -> Cloudinary: upload(bytes,\n{folder, type: "authenticated",\nresource_type: "image"})
+    activate Cloudinary
+
+    alt Upload reușit
+        Cloudinary --> CSVC: {public_id}
+        deactivate Cloudinary
+        CSVC --> SVC: publicId
+        deactivate CSVC
+        SVC -> SVC: image = ParkingSpotImage\n{publicId, parkingSpot}\nspot.getImages().add(image)
+    else Upload eșuat
+        Cloudinary --> CSVC: IOException
+        deactivate Cloudinary
+        CSVC --> SVC: IOException
+        deactivate CSVC
+        SVC --> CTRL: IOException
+        CTRL --> FE: 500 Internal Server Error
+        FE -> User: Afișează eroare\n"Încărcare imagine eșuată"
+    end
+end
+
+SVC -> SREPO: save(spot)\ncu imaginile asociate
+activate SREPO
+SREPO -> DB: INSERT INTO parking_spot_images\n{publicId, parking_spot_id}
+DB --> SREPO: ok
+SREPO --> SVC: ParkingSpot actualizat
+deactivate SREPO
+
+SVC --> CTRL: ParkingSpotResponse
+deactivate SVC
+
+CTRL --> FE: 201 Created\n{ParkingSpotResponse}
+deactivate CTRL
+
+FE -> User: Afișează locul\nnou creat în grilă
+deactivate FE
+
+@enduml

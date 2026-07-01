@@ -4,7 +4,6 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "./LocationPicker.styles.css";
 
-// Fix Leaflet's default marker icon paths broken by bundlers
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
@@ -58,7 +57,6 @@ function LocationPicker({ value, onChange, disabled = false, initialCenter }: Lo
     const [searching, setSearching] = useState(false);
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    // ── Init map ────────────────────────────────────────────────
     useEffect(() => {
         if (!mapContainerRef.current || mapRef.current) return;
 
@@ -75,13 +73,11 @@ function LocationPicker({ value, onChange, disabled = false, initialCenter }: Lo
             attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
         }).addTo(map);
 
-        // Place initial marker
         if (value) {
             markerRef.current = L.marker([value.lat, value.lng], { draggable: true }).addTo(map);
             markerRef.current.on("dragend", handleMarkerDrag);
         }
 
-        // Click to place/move marker
         map.on("click", async (e: L.LeafletMouseEvent) => {
             const latlng = { lat: e.latlng.lat, lng: e.latlng.lng };
 
@@ -121,7 +117,6 @@ function LocationPicker({ value, onChange, disabled = false, initialCenter }: Lo
         onChange(latlng, "");
     }
 
-    // ── Address search with debounce ────────────────────────────
     const handleSearchInput = (e: React.ChangeEvent<HTMLInputElement>) => {
         const val = e.target.value;
         setQuery(val);
@@ -157,7 +152,6 @@ function LocationPicker({ value, onChange, disabled = false, initialCenter }: Lo
 
     return (
         <div className="location-picker">
-            {/* Search */}
             <div className="location-picker__search-wrap">
                 <Search size={15} className="location-picker__search-icon" />
                 <input
@@ -185,7 +179,6 @@ function LocationPicker({ value, onChange, disabled = false, initialCenter }: Lo
                 )}
             </div>
 
-            {/* Map */}
             <div ref={mapContainerRef} className="location-picker__map" />
 
         </div>

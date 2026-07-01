@@ -29,7 +29,7 @@ function generateDates(startDate: string, recurrence: RecurrenceType, stopDate: 
     const current = new Date(start);
 
     while (current <= stop) {
-        const dayOfWeek = current.getDay(); // 0=Sun, 6=Sat
+        const dayOfWeek = current.getDay();
 
         if (recurrence === "daily") {
             dates.push(formatDate(current));
@@ -84,7 +84,6 @@ function RentModal({ isOpen, onClose, spotId, spotDescription, onUpdateTimeSlots
         : [selectedDate];
 
 
-    // Close recurrence dropdown on outside click
     useEffect(() => {
         const handleClick = (e: MouseEvent) => {
             if (recurrenceRef.current && !recurrenceRef.current.contains(e.target as Node)) {
@@ -106,7 +105,6 @@ function RentModal({ isOpen, onClose, spotId, spotDescription, onUpdateTimeSlots
             .catch((err: unknown) => setError(err instanceof Error ? err.message : "Eroare la încărcarea intervalelor."));
     }, [isOpen]);
 
-    // ── Load spot slots when date changes ─────────────────────
     useEffect(() => {
         if (!isOpen) return;
         if (lastFetchedDateRef.current === selectedDate) return;
@@ -127,7 +125,6 @@ function RentModal({ isOpen, onClose, spotId, spotDescription, onUpdateTimeSlots
             .finally(() => setAvailabilityLoading(false));
     }, [isOpen, selectedDate, spotId]);
 
-    // ── Reset on close ────────────────────────────────────────
     useEffect(() => {
         if (!isOpen) {
             lastFetchedDateRef.current = "";
@@ -236,10 +233,8 @@ function RentModal({ isOpen, onClose, spotId, spotDescription, onUpdateTimeSlots
                     </button>
                 </div>
 
-                {/* Body */}
                 <div className="rent-modal__body">
 
-                    {/* Date picker */}
                     <div onClick={() => datePickerRef.current?.showPicker()}>
                         <p className="rent-modal__section-label">
                             <CalendarDays size={13} style={{ display: "inline", marginRight: "0.3rem" }} />
@@ -261,14 +256,12 @@ function RentModal({ isOpen, onClose, spotId, spotDescription, onUpdateTimeSlots
                         />
                     </div>
 
-                    {/* Recurrence picker */}
                     <div className="rent-modal__recurrence-wrap" ref={recurrenceRef}>
                         <p className={`rent-modal__section-label ${!hasAdditions && !hasDeletions ? "rent-modal__section-label--disabled" : ""}`}>
                             <Repeat size={13} style={{ display: "inline", marginRight: "0.3rem" }} />
                             Recurență
                         </p>
 
-                        {/* Custom dropdown */}
                         <button
                             className={`rent-modal__recurrence-btn ${recurrence !== "none" ? "rent-modal__recurrence-btn--active" : ""}`}
                             onClick={() => (hasAdditions || hasDeletions) && setRecurrenceOpen((p) => !p)}
@@ -296,7 +289,6 @@ function RentModal({ isOpen, onClose, spotId, spotDescription, onUpdateTimeSlots
                             </div>
                         )}
 
-                        {/* Stop date — only when recurrence is active */}
                         {recurrence !== "none" && (hasAdditions || hasDeletions) && (
                             <div className="rent-modal__stop-date" onClick={() => endPickerRef.current?.showPicker()}>
                                 <p className="rent-modal__section-label" style={{ marginBottom: "0.3rem" }}>
@@ -321,7 +313,6 @@ function RentModal({ isOpen, onClose, spotId, spotDescription, onUpdateTimeSlots
                         )}
                     </div>
 
-                    {/* Slots */}
                     <div className="rent-modal__slots-section">
                         <p className="rent-modal__section-label">Intervale orare</p>
 
@@ -357,7 +348,6 @@ function RentModal({ isOpen, onClose, spotId, spotDescription, onUpdateTimeSlots
                     </div>
                 </div>
 
-                {/* Footer */}
                 <div className="rent-modal__footer">
                     <p className="rent-modal__selection-info">
                         <strong>{summaryText()}</strong>

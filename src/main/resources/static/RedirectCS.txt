@@ -1,0 +1,37 @@
+@startuml
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 10
+skinparam sequenceBoxBorderColor #555555
+skinparam sequenceBoxBackgroundColor #F5F5F5
+skinparam sequenceFontSize 14
+skinparam sequenceParticipantFontSize 14
+skinparam sequenceArrowFontSize 13
+skinparam noteFontSize 13
+
+actor "Utilizator" as User
+
+box "Park a Lot" #EEF3FB
+    participant "Browser\n(React)" as FE
+end box
+
+actor "Stripe API" as Stripe
+
+== Precondiție: Stripe a procesat răspunsul utilizatorului ==
+
+alt Plată reușită
+    Stripe -> FE: Redirect → successUrl\n(/bookings?success=true)
+    activate FE
+    FE -> FE: Detectează parametrul\nsuccess din URL
+    FE -> User: Afișează confirmare\n"Rezervare confirmată!"
+    deactivate FE
+    note over FE, User: Rezervarea este deja creată\nîn backend prin webhook\n(asincron, independent\nde această redirecționare)
+
+else Plată anulată sau refuzată
+    Stripe -> FE: Redirect → cancelUrl\n(/find_spot?cancelled=true)
+    activate FE
+    FE -> FE: Detectează parametrul\ncancelled din URL
+    FE -> User: Afișează mesaj\n"Plata nu a fost procesată"
+    deactivate FE
+end
+
+@enduml

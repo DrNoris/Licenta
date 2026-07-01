@@ -1,0 +1,77 @@
+@startuml
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 10
+skinparam sequenceBoxBorderColor #555555
+skinparam sequenceBoxBackgroundColor #F5F5F5
+
+actor "Utilizator" as User
+
+box "Park a Lot" #EEF3FB
+    participant "Browser\n(React)" as FE
+    participant "BookingController" as CTRL
+    participant "BookingService" as SVC
+    participant "ParkingSpotRepository" as REPO
+end box
+
+actor "Stripe API" as Stripe
+database "PostgreSQL" as DB
+
+== Precondiție: Utilizator autentificat și a selectat intervale orare ale unui loc de parcare ==
+note over User, FE: JWT valid prezent în headers\nUtilizatorul a selectat intervalele orare
+
+User -> FE: Apasă "Rezervă"
+activate FE
+
+FE -> CTRL: POST /api/bookings/checkout\n{spotId, date, timeSlotIds}\nAuthorization: Bearer <JWT>
+activate CTRL
+
+CTRL -> CTRL: userId =\nUUID.fromString(\nauthentication.getName())
+
+CTRL -> SVC: createCheckoutSession(\nrequest, userId)
+activate SVC
+
+SVC -> REPO: findById(spotId)
+activate REPO
+REPO -> DB: SELECT * FROM parking_spots\nWHERE id = :spotId
+DB --> REPO: ParkingSpot
+REPO --> SVC: ParkingSpot\n{pricePerHour, description, address}
+deactivate REPO
+
+alt ParkingSpot negăsit
+    SVC --> CTRL: NoSuchElementException
+    CTRL --> FE: 404 Not Found
+    FE -> User: Afișează eroare\n"Locul de parcare nu există"
+end
+
+SVC -> SVC: slotCount = timeSlotIds.size()\nunitAmount = round(pricePerHour * 100)
+
+note over SVC: Suma totală este calculată\nde Stripe pe baza\nunitAmount × slotCount
+
+SVC -> Stripe: Session.create(params)\n{mode: PAYMENT,\nlineItems: [{quantity: slotCount,\nunitAmount, currency: "ron"}],\nsuccessUrl, cancelUrl,\nmetadata: {spotId, userId,\ndate, timeSlotIds}}
+activate Stripe
+
+alt Stripe disponibil
+    Stripe --> SVC: Session {url}
+    deactivate Stripe
+    SVC --> CTRL: checkoutUrl
+    deactivate SVC
+    CTRL --> FE: 200 OK {checkoutUrl}
+    deactivate CTRL
+    FE -> FE: window.location.href\n= checkoutUrl
+    FE -> Stripe: Redirect browser\n→ pagina Stripe Checkout
+    activate Stripe
+    User -> Stripe: Introduce datele cardului
+    deactivate FE
+
+else Stripe indisponibil
+    Stripe --> SVC: StripeException
+    deactivate Stripe
+    SVC --> CTRL: StripeException
+    deactivate SVC
+    CTRL --> FE: 500 Internal Server Error
+    deactivate CTRL
+    FE -> User: Afișează eroare\n"Plata indisponibilă"
+    deactivate FE
+end
+
+@enduml

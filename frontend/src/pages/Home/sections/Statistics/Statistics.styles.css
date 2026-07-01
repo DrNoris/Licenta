@@ -1,4 +1,3 @@
-/* ── Wrapper ─────────────────────────────────────────────────── */
 .statistics {
     background-color: #1e40af;
     display: flex;
@@ -15,7 +14,6 @@
     }
 }
 
-/* ── Individual stat card ────────────────────────────────────── */
 .statistics__item {
     display: flex;
     flex-direction: column;
@@ -23,7 +21,6 @@
     width: auto;
 }
 
-/* ── SVG circle ──────────────────────────────────────────────── */
 .statistics__svg {
     width: 100%;
     height: 100%;
@@ -43,7 +40,6 @@
     fill: white;
 }
 
-/* ── Description text ────────────────────────────────────────── */
 .statistics__label {
     font-weight: 700;
     font-size: 1.25rem;

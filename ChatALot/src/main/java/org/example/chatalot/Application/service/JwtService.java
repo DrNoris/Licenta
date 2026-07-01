@@ -13,17 +13,6 @@ import java.util.Date;
 public class JwtService {
 
     private final String SECRET = "very-long-secret-key-for-jwt-signing-123456789";
-    private final Key key = Keys.hmacShaKeyFor(SECRET.getBytes());
-
-    public String generateToken(String userId, String role) {
-        return Jwts.builder()
-                .subject(userId)
-                .claim("role", role)
-                .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + 86400000))
-                .signWith(key)
-                .compact();
-    }
 
     public Claims extractClaims(String token) {
         return Jwts.parser()

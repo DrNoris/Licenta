@@ -39,7 +39,6 @@ function Login() {
 
     return (
         <div className="login-page">
-            {/* Fixed header */}
             <header className="login-page__header">
                 <div className="login-page__header-inner">
                     <Link to="/" className="login-page__logo">
@@ -48,7 +47,6 @@ function Login() {
                 </div>
             </header>
 
-            {/* Centered card */}
             <div className="login-page__body">
                 <div className="login-card">
                     <h2 className="login-card__title">Autentificare</h2>

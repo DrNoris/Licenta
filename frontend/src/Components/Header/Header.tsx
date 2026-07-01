@@ -11,12 +11,10 @@ function Header() {
         <header className="header">
             <div className="header__inner">
 
-                {/* Logo */}
                 <Link to="/" className="header__logo">
                     <img src="logo.png" alt="Park a Lot Logo" className="header__logo-img" />
                 </Link>
 
-                {/* Desktop Nav */}
                 <nav className="header__nav-desktop">
                     {isAuthenticated() ? (
                         <>
@@ -57,13 +55,11 @@ function Header() {
                     )}
                 </nav>
 
-                {/* Burger Button */}
                 <button className="header__burger" onClick={() => setIsOpen(!isOpen)} aria-label="Toggle menu">
                     {isOpen ? <X size={30} /> : <Menu size={30} />}
                 </button>
             </div>
 
-            {/* Mobile Nav */}
             {isOpen && (
                 <nav className="header__nav-mobile">
                     {isAuthenticated() ? (

@@ -118,7 +118,6 @@ function AddSpotModal({ open, onClose, onAdd }: AddSpotModalProps) {
         <div className="add-spot-overlay" onClick={handleOverlayClick}>
             <div className="add-spot-modal">
 
-                {/* ── Header ─────────────────────────────────────────── */}
                 <div className="add-spot-modal__header">
                     <h3 className="add-spot-modal__title">Adaugă loc de parcare</h3>
                     <button className="add-spot-modal__close" onClick={onClose} aria-label="Închide">
@@ -127,10 +126,8 @@ function AddSpotModal({ open, onClose, onAdd }: AddSpotModalProps) {
                 </div>
 
                 <form onSubmit={handleSubmit} noValidate style={{ display: "contents" }}>
-                    {/* ── Body ───────────────────────────────────────────── */}
                     <div className="add-spot-modal__body">
 
-                        {/* Section: Details */}
                         <div>
                             <p className="add-spot-modal__section-label">
                                 Detalii
@@ -152,7 +149,6 @@ function AddSpotModal({ open, onClose, onAdd }: AddSpotModalProps) {
 
                         <hr className="add-spot-modal__divider"/>
 
-                        {/* Section: Prices */}
                         <div>
                             <p className="add-spot-modal__section-label">
                                 <DollarSign size={13} style={{display: "inline", marginRight: "0.3rem"}}/>
@@ -178,7 +174,6 @@ function AddSpotModal({ open, onClose, onAdd }: AddSpotModalProps) {
 
                         <hr className="add-spot-modal__divider"/>
 
-                        {/* Section: Photos */}
                         <div>
                             <p className="add-spot-modal__section-label">
                                 <Camera size={13} style={{display: "inline", marginRight: "0.3rem"}}/>
@@ -193,7 +188,6 @@ function AddSpotModal({ open, onClose, onAdd }: AddSpotModalProps) {
 
                         <hr className="add-spot-modal__divider"/>
 
-                        {/* Section: Location */}
                         <div>
                             <p className="add-spot-modal__section-label">
                                 <MapPin size={13} style={{display: "inline", marginRight: "0.3rem"}}/>
@@ -220,7 +214,6 @@ function AddSpotModal({ open, onClose, onAdd }: AddSpotModalProps) {
                         )}
                     </div>
 
-                    {/* ── Footer ─────────────────────────────────────────── */}
                     <div className="add-spot-modal__footer">
                         <span className="add-spot-modal__footer-info">
                             * câmpuri obligatorii

@@ -1,4 +1,3 @@
-/* ── Page ────────────────────────────────────────────────────── */
 .bookings-page {
     min-height: 100vh;
     background-color: #f3f4f6;
@@ -10,7 +9,6 @@
     padding: 2rem 1rem;
 }
 
-/* ── Header ──────────────────────────────────────────────────── */
 .bookings-page__title {
     font-size: 1.5rem;
     font-weight: 700;
@@ -24,7 +22,6 @@
     margin: 0 0 2rem;
 }
 
-/* ── Tabs ────────────────────────────────────────────────────── */
 .bookings-page__tabs {
     display: flex;
     gap: 0;

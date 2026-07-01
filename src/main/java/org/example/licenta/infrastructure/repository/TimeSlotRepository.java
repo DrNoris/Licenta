@@ -9,7 +9,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface TimeSlotRepository extends JpaRepository<TimeSlot, UUID> {
-    boolean existsByStartHour(Integer startHour);
     @Query("SELECT t FROM TimeSlot t WHERE t.startHour <= :hour AND t.endHour > :hour")
     Optional<TimeSlot> findByHour(@Param("hour") int hour);
 }

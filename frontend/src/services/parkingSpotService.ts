@@ -24,7 +24,6 @@ export function jsonAuthHeaders(): Record<string, string> {
     };
 }
 
-// ── Get all my parking spots ──────────────────────────────────
 export async function getMyParkingSpots(): Promise<ParkingSpot[]> {
     const res = await fetch(`${API_BASE}/api/parking-spot/manage`, {
         headers: jsonAuthHeaders(),
@@ -33,13 +32,8 @@ export async function getMyParkingSpots(): Promise<ParkingSpot[]> {
     return res.json();
 }
 
-// ── Add a parking spot (multipart) ───────────────────────────
-// Sends spot data as a JSON part + images as file parts
-export async function addParkingSpot(
-    spot: Omit<ParkingSpot, "id" | "imagePublicIds" | "availableNow">,
-    files: File[]
-): Promise<ParkingSpot> {
-    const formData = new FormData();
+export async function addParkingSpot(spot: Omit<ParkingSpot, "id" | "imagePublicIds" | "availableNow">, files: File[]): Promise<ParkingSpot> {
+    const formData: FormData = new FormData();
 
     formData.append(
         "data",
@@ -48,24 +42,20 @@ export async function addParkingSpot(
 
     files.forEach((file) => formData.append("images", file));
 
-    const res = await fetch(`${API_BASE}/api/parking-spot`, {
+    const res: Response = await fetch(`${API_BASE}/api/parking-spot`, {
         method: "POST",
         headers: authHeaders(),
         body: formData,
     });
 
-    if (!res.ok) throw new Error("Adăugarea a eșuat.");
+    if (!res.ok)
+        throw new Error("Adăugarea a eșuat.");
+
     return res.json();
 }
 
-// ── Edit a parking spot (PATCH) ───────────────────────────────
-export async function editParkingSpotPatch(
-    spotId: string,
-    data: { description: string; pricePerHour: number; },
-    newFiles: File[],
-    publicIdsToDelete: string[]
-): Promise<ParkingSpot> {
-    const formData = new FormData();
+export async function editParkingSpotPatch(spotId: string, data: { description: string; pricePerHour: number; }, newFiles: File[], publicIdsToDelete: string[]): Promise<ParkingSpot> {
+    const formData: FormData = new FormData();
 
     formData.append(
         "data",
@@ -77,17 +67,18 @@ export async function editParkingSpotPatch(
 
     newFiles.forEach((file) => formData.append("images", file));
 
-    const res = await fetch(`${API_BASE}/api/parking-spot/${spotId}`, {
+    const res: Response = await fetch(`${API_BASE}/api/parking-spot/${spotId}`, {
         method: "PATCH",
         headers: authHeaders(),
         body: formData,
     });
 
-    if (!res.ok) throw new Error("Editarea a eșuat.");
+    if (!res.ok)
+        throw new Error("Editarea a eșuat.");
+
     return res.json();
 }
 
-// ── Delete a parking spot ─────────────────────────────────────
 export async function deleteParkingSpot(id: string): Promise<void> {
     const res = await fetch(`${API_BASE}/api/parking-spot/${id}`, {
         method: "DELETE",
@@ -101,9 +92,6 @@ export async function deleteParkingSpot(id: string): Promise<void> {
         throw new Error("Ștergerea a eșuat.");
 }
 
-// ── Fetch signed image URLs for an authorized user ────────────
-// Backend checks if user owns the spot or has an active booking,
-// then returns short-lived Cloudinary signed URLs
 function getExpiryFromUrl(url: string): number {
     try {
         const match = url.match(/[?&]expires_at=(\d+)/);
@@ -140,7 +128,6 @@ export async function getSignedImageUrls(spotId: string): Promise<string[]> {
     return urls;
 }
 
-// ── Search parking spots in bounding box ─────────────────────
 export async function searchParkingSpots(params: FindSpotSearchParams): Promise<ParkingSpot[]> {
     const { boundingBox, filters } = params;
 

@@ -9,13 +9,11 @@ export default function HeroVideo({
                    }: HeroVideoProps) {
     return (
         <div className="hero">
-            {/* Background */}
             <div className="hero__background">
                 <img src={backgroundSrc} alt="Background" className="hero__bg-image" />
                 <div className="hero__overlay" />
             </div>
 
-            {/* Content */}
             <div data-aos="fade-up" className="hero__content">
                 <h1 className="hero__title">{title}</h1>
                 <p className="hero__subtitle">{subtitle}</p>

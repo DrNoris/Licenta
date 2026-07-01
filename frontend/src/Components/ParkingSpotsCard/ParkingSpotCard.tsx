@@ -35,7 +35,6 @@ function ParkingSpotCard({ spot, onDelete, onUpdateTimeSlots, onEdit, isOwner = 
 
         return () => {
             cancelled = true;
-            // revoke blob URLs on cleanup to free memory
             blobUrls.forEach((url) => URL.revokeObjectURL(url));
         };
     }, [signedUrls]);
@@ -84,8 +83,7 @@ function ParkingSpotCard({ spot, onDelete, onUpdateTimeSlots, onEdit, isOwner = 
         if (onUpdateTimeSlots)
             buttons.push(<button
                 className="spot-card__btn spot-card__btn__add-time-slot"
-                onClick={() => setAddTimeSlotModal(true)} //on click trebuie sa deschida un modal de add time slot ce sa primeasca ca params functia de onadd
-            >
+                onClick={() => setAddTimeSlotModal(true)}>
                 <AlarmClockPlus size={15}/>
             </button>)
 
@@ -104,7 +102,6 @@ function ParkingSpotCard({ spot, onDelete, onUpdateTimeSlots, onEdit, isOwner = 
 
     return (<>
         <div className="spot-card">
-            {/* ── Image area ─────────────────────────────────────────── */}
             <div className="spot-card__image-wrap">
 
                 {imageState === "loading" && (
@@ -128,23 +125,6 @@ function ParkingSpotCard({ spot, onDelete, onUpdateTimeSlots, onEdit, isOwner = 
                         onClick={() => setActiveImage((activeImage + 1) % blobUrls.length)}
                     />
                 )}
-                        {/* Thumbnail strip */}
-                        {/*{signedUrls.length > 1 && (*/}
-                        {/*    <div className="spot-card__thumbnails">*/}
-                        {/*        {signedUrls.map((url, i) => (*/}
-                        {/*            <button*/}
-                        {/*                key={i}*/}
-                        {/*                className={`spot-card__thumb ${i === activeImage ? "spot-card__thumb--active" : ""}`}*/}
-                        {/*                onClick={() => setActiveImage(i)}*/}
-                        {/*            >*/}
-                        {/*                <img src={url} alt={`thumb-${i}`} />*/}
-                        {/*            </button>*/}
-                        {/*        ))}*/}
-                        {/*    </div>*/}
-                        {/*)}*/}
-                {/*    </>*/}
-                {/*)}*/}
-
                 {imageState === "idle" && (
                     <div className="spot-card__image-state">
                         <ImageOff size={28} />
@@ -152,7 +132,6 @@ function ParkingSpotCard({ spot, onDelete, onUpdateTimeSlots, onEdit, isOwner = 
                 )}
             </div>
 
-            {/* ── Body ───────────────────────────────────────────────── */}
             <div className="spot-card__body">
                 <p className="spot-card__description">{spot.description}</p>
                 <span className="spot-card__location">
@@ -164,7 +143,6 @@ function ParkingSpotCard({ spot, onDelete, onUpdateTimeSlots, onEdit, isOwner = 
                 </div>
             </div>
 
-            {/* ── Footer ─────────────────────────────────────────────── */}
             {getFooter(isOwner)}
         </div>
 

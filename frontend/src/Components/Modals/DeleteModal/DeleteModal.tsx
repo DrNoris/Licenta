@@ -28,7 +28,6 @@ function DeleteModal({ isOpen, spotId, onDelete, onClose }: DeleteModalProps) {
             onClose();
             await deletePromise;
         } catch {
-            // toast handles the error display
         } finally {
             setLoading(false);
         }
@@ -42,7 +41,6 @@ function DeleteModal({ isOpen, spotId, onDelete, onClose }: DeleteModalProps) {
         <div className="delete-overlay" onClick={handleOverlayClick}>
             <div className="delete-modal">
 
-                {/* Header */}
                 <div className="delete-modal__header">
                     <h3 className="delete-modal__title">Șterge loc de parcare</h3>
                     <button className="delete-modal__close" onClick={onClose} aria-label="Închide">
@@ -50,7 +48,6 @@ function DeleteModal({ isOpen, spotId, onDelete, onClose }: DeleteModalProps) {
                     </button>
                 </div>
 
-                {/* Body */}
                 <div className="delete-modal__body">
                     <div className="delete-modal__icon-wrap">
                         <Trash2 size={24} />
@@ -63,7 +60,6 @@ function DeleteModal({ isOpen, spotId, onDelete, onClose }: DeleteModalProps) {
                     </p>
                 </div>
 
-                {/* Footer */}
                 <div className="delete-modal__footer">
                     <button
                         className="delete-modal__btn-cancel"

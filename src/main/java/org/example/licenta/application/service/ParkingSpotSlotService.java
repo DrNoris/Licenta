@@ -62,7 +62,6 @@ public class ParkingSpotSlotService {
         if (!spot.getOwner().getId().equals(ownerId))
             throw new AccessDeniedException("You do not own this parking spot");
 
-        // Fetch existing slots in one query
         Set<String> existing = parkingSpotSlotRepository
                 .findAllByParkingSpotIdAndTimeSlotIdInAndDateIn(
                         parkingSpotId, request.getTimeSlotIds(), request.getDates()
