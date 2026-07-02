@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import './Header.styles.css'
 import {isAuthenticated, logout} from "../../services/authService.ts";
+import logo from "../../assets/logo.png";
 
 function Header() {
     const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -12,7 +13,7 @@ function Header() {
             <div className="header__inner">
 
                 <Link to="/" className="header__logo">
-                    <img src="logo.png" alt="Park a Lot Logo" className="header__logo-img" />
+                    <img src={logo} alt="Park a Lot Logo" className="header__logo-img" />
                 </Link>
 
                 <nav className="header__nav-desktop">
