@@ -51,10 +51,7 @@ public class ChatService {
     @Transactional
     public ConversationResponse getOrCreateConversation(CreateConversationRequest request, UUID requesterId, String requesterName) {
         return conversationRepository
-                .findByParkingSpotIdAndBuyerIdOrParkingSpotIdAndSellerId(
-                        request.getParkingSpotId(), requesterId,
-                        request.getParkingSpotId(), requesterId
-                )
+                .findBySpotAndUser(request.getParkingSpotId(), requesterId)
                 .map(c -> chatMapper.toResponse(c, requesterId))
                 .orElseGet(() -> {
                     ParkingSpotResponse spotData = fetchOwnerData(request.getParkingSpotId());
