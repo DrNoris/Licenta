@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import type {RegisterFormState} from "./Register.types.ts";
 import {registerRequest} from "../../services/authService.ts";
 import "./Register.styles.css"
+import logo from "../../assets/logo.png"
 
 export default function Register() {
     const navigate = useNavigate();
@@ -46,7 +47,7 @@ export default function Register() {
             <header className="register-page__header">
                 <div className="register-page__header-inner">
                     <Link to="/" className="register-page__logo">
-                        <img src="logo.png" alt="Park a Lot Logo" className="register-page__logo-img" />
+                        <img src={logo} alt="Park a Lot Logo" className="register-page__logo-img" />
                     </Link>
                 </div>
             </header>

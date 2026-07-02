@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import type { LoginFormState } from "./Login.types.ts";
 import {loginRequest} from "../../services/authService.ts";
 import "./Login.styles.css";
+import logo from "../../assets/logo.png"
 
 function Login() {
     const navigate = useNavigate();
@@ -42,7 +43,7 @@ function Login() {
             <header className="login-page__header">
                 <div className="login-page__header-inner">
                     <Link to="/" className="login-page__logo">
-                        <img src="logo.png" alt="Park a Lot Logo" className="login-page__logo-img" />
+                        <img src={logo} alt="Park a Lot Logo" className="login-page__logo-img" />
                     </Link>
                 </div>
             </header>
